@@ -47,11 +47,21 @@ the database settings, then navigate the tree the way you would in yazi:
 The current path is shown in the window title, and a chevron badge on each row
 shows how many sub-issues it holds.
 
-While sub-issues are configured the main list shows only top-level tasks, and a
-task created inside a level is automatically filed under that parent. The menu
-bar command is unaffected and keeps listing every active task, nested or not.
+Two views, toggled with `⌘ + ⇧ + O`:
 
-Both shortcuts can be rebound in Raycast under **Settings → Extensions →
+- **Top-level only** (default) — the main list shows tasks that aren't nested
+  inside another task. Leaf tasks and parent tasks sit side by side; only the
+  children are tucked away one level down.
+- **All issues** — the main list shows every task regardless of depth. Drilling
+  in still works, so you can jump from a sub-issue's siblings straight into its
+  own children.
+
+Switching view returns you to the top, since a path through the tree has no
+meaning in the flat view. A task created inside a level is automatically filed
+under that parent. The menu bar command is unaffected and always lists every
+active task, nested or not.
+
+All three shortcuts can be rebound in Raycast under **Settings → Extensions →
 Hypersonic**.
 
 ### List of commands
@@ -59,6 +69,7 @@ Hypersonic**.
 - Press `↵` to complete a task or create a new one.
 - Press `⌃ + L` to drill into a task's sub-issues.
 - Press `⌃ + H` to climb back out one level.
+- Press `⌘ + ⇧ + O` to toggle between top-level-only and all issues.
 - Press `⌘ + ↵` to set a status.
 - Press `⌘ + F` to filter your tasks.
 - Press `⌘ + R` to edit the title of a task.

@@ -20,6 +20,7 @@ import { OpenAttachedLink } from './components/open-attached-link'
 import { SetStatusAction } from './components/set-todo-status-action'
 import { OpenSubIssuesAction } from './components/open-sub-issues-action'
 import { BackToParentAction } from './components/back-to-parent-action'
+import { ToggleSubIssuesAction } from './components/toggle-sub-issues-action'
 import { getRenderer } from '@/services/accessories/renderer-registry'
 import { Todo } from '@/types/todo'
 import { AccessoryConfig } from '@/types/accessory-config'
@@ -74,9 +75,11 @@ export function TodoList() {
     subIssueNavigation,
     handleOpenSubIssues,
     handleGoBack,
+    handleToggleShowAllIssues,
   } = useTodoList()
 
-  const { currentParent, isNested, breadcrumb, backTitle } = subIssueNavigation
+  const { currentParent, isNested, backTitle, showAllIssues, navigationTitle } =
+    subIssueNavigation
 
   const currentLevelCount = useMemo(
     () =>
@@ -91,6 +94,13 @@ export function TodoList() {
     hasSubIssueProperty && isNested ? (
       <BackToParentAction backTitle={backTitle} onBack={handleGoBack} />
     ) : null
+
+  const toggleAction = hasSubIssueProperty ? (
+    <ToggleSubIssuesAction
+      showAllIssues={showAllIssues}
+      onToggle={handleToggleShowAllIssues}
+    />
+  ) : null
 
   const filterCount = useMemo(() => {
     let amount = 0
@@ -131,7 +141,7 @@ export function TodoList() {
       isLoading={loading}
       searchText={searchText}
       onSearchTextChange={onSearchTextChange}
-      navigationTitle={isNested ? breadcrumb : undefined}
+      navigationTitle={hasSubIssueProperty ? navigationTitle : undefined}
       searchBarPlaceholder={
         currentParent
           ? `Search or create sub-issue in ${currentParent.title}`
@@ -166,6 +176,7 @@ export function TodoList() {
                 shortcut={{ modifiers: ['cmd'], key: 'o' }}
               />
               {backAction}
+              {toggleAction}
               <GeneralActions
                 mutatePreferences={mutatePreferences}
                 notionDbUrl={notionDbUrl}
@@ -190,6 +201,7 @@ export function TodoList() {
           actions={
             <ActionPanel>
               {backAction}
+              {toggleAction}
               {isNotionInstalled ? (
                 <OpenInNotionAction url={currentParent.url} />
               ) : (
@@ -273,6 +285,7 @@ export function TodoList() {
                         />
                       )}
                       {backAction}
+                      {toggleAction}
                       {hasStatusProperty && statuses?.length > 0 && (
                         <SetStatusAction
                           todo={todo}
@@ -348,6 +361,7 @@ export function TodoList() {
       <EmptyList
         notionDbUrl={notionDbUrl}
         mutatePreferences={mutatePreferences}
+        actions={toggleAction}
       />
     </List>
   )

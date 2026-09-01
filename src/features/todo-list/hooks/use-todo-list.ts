@@ -87,7 +87,7 @@ export function useTodoList() {
     filter: filterTodo,
     accessoryConfig,
     parentId: subIssueNavigation.currentParent?.id ?? null,
-    scopeToLevel: hasSubIssueProperty,
+    scopeToLevel: hasSubIssueProperty && subIssueNavigation.scopeToLevel,
   })
 
   // Moving between levels starts a fresh list, so the half-typed task that was
@@ -105,6 +105,11 @@ export function useTodoList() {
 
   const handleGoBack = () => {
     subIssueNavigation.goBack()
+    clearComposer()
+  }
+
+  const handleToggleShowAllIssues = () => {
+    subIssueNavigation.toggleShowAllIssues()
     clearComposer()
   }
 
@@ -598,5 +603,6 @@ export function useTodoList() {
     subIssueNavigation,
     handleOpenSubIssues,
     handleGoBack,
+    handleToggleShowAllIssues,
   }
 }

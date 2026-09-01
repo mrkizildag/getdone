@@ -3,6 +3,7 @@ import { Todo } from '@/types/todo'
 
 const BREADCRUMB_SEPARATOR = ' › '
 const ROOT_TITLE = 'All Tasks'
+const FLAT_TITLE = 'All Issues'
 
 export interface SubIssueNavigation {
   /** Ancestors of the level currently on screen, outermost first. */
@@ -14,9 +15,19 @@ export interface SubIssueNavigation {
   /** Name of the level `goBack` returns to. */
   backTitle: string
   isNested: boolean
+  /** At the root level, show every task instead of only parentless ones. */
+  showAllIssues: boolean
+  /** Title for the window header, or undefined for the command default. */
+  navigationTitle: string | undefined
+  /**
+   * Restrict the query to a single level. False only at a flat root, where
+   * every task should come back regardless of depth.
+   */
+  scopeToLevel: boolean
   drillInto: (todo: Todo) => void
   goBack: () => void
   goToRoot: () => void
+  toggleShowAllIssues: () => void
 }
 
 /**
@@ -25,6 +36,7 @@ export interface SubIssueNavigation {
  */
 export function useSubIssueNavigation(): SubIssueNavigation {
   const [parentStack, setParentStack] = useState<Todo[]>([])
+  const [showAllIssues, setShowAllIssues] = useState(false)
 
   const currentParent =
     parentStack.length > 0 ? parentStack[parentStack.length - 1] : null
@@ -32,16 +44,32 @@ export function useSubIssueNavigation(): SubIssueNavigation {
   const parentOfCurrent =
     parentStack.length > 1 ? parentStack[parentStack.length - 2] : null
 
+  const isNested = parentStack.length > 0
+  const breadcrumb = parentStack
+    .map((todo) => todo.title)
+    .join(BREADCRUMB_SEPARATOR)
+
   return {
     parentStack,
     currentParent,
-    breadcrumb: parentStack
-      .map((todo) => todo.title)
-      .join(BREADCRUMB_SEPARATOR),
+    breadcrumb,
     backTitle: parentOfCurrent ? parentOfCurrent.title : ROOT_TITLE,
-    isNested: parentStack.length > 0,
+    isNested,
+    showAllIssues,
+    navigationTitle: isNested
+      ? breadcrumb
+      : showAllIssues
+      ? FLAT_TITLE
+      : undefined,
+    scopeToLevel: isNested || !showAllIssues,
     drillInto: (todo: Todo) => setParentStack((stack) => [...stack, todo]),
     goBack: () => setParentStack((stack) => stack.slice(0, -1)),
     goToRoot: () => setParentStack([]),
+    // Switching view mode returns to the top: the ancestor stack describes a
+    // path through the tree, which has no meaning in the flat view.
+    toggleShowAllIssues: () => {
+      setShowAllIssues((current) => !current)
+      setParentStack([])
+    },
   }
 }
