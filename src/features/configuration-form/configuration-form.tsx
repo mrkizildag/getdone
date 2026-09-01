@@ -14,68 +14,10 @@ import {
 import { FormValidation, useCachedState, useForm } from '@raycast/utils'
 import { useEffect, useState } from 'react'
 import { withKnownColumns } from './utils/known-columns'
-
-type OnboardFormValues = {
-  mainDatabase: string
-  titleProperty: string
-  urlProperty: string
-  dateProperty: string
-  tagsProperty: string
-  statusProperty: string
-  assigneeProperty: string
-  projectProperty: string
-  projectStatusProperty: string
-  subIssuesProperty: string
-}
-
-const handleOptionalField = (value: string): string | undefined => {
-  return value === NONE_VALUE ? undefined : value
-}
-
-const normalizeValuesToStore = (
-  values: OnboardFormValues,
-  relatedDatabaseTitle?: string
-): Preferences => {
-  const mainDatabase = JSON.parse(values.mainDatabase || '{}')
-  const project = JSON.parse(values.projectProperty || '{}')
-  const status = JSON.parse(values.statusProperty || '{}')
-  const projectStatus = JSON.parse(values.projectStatusProperty || '{}')
-  const subIssues = JSON.parse(values.subIssuesProperty || '{}')
-
-  return {
-    databaseId: mainDatabase.id,
-    databaseName: mainDatabase.name,
-    databaseUrl: mainDatabase.url,
-    normalizedUrl: formatNotionUrl(mainDatabase.url),
-    properties: {
-      title: values.titleProperty,
-      date: values.dateProperty,
-      url: handleOptionalField(values.urlProperty),
-      status: {
-        type: status.type,
-        name: status.name,
-        doneName: status.doneName,
-        completedStatuses: status.completedStatuses,
-        inProgressId: status.inProgressId,
-        notStartedId: status.notStartedId,
-      },
-      tag: handleOptionalField(values.tagsProperty),
-      assignee: handleOptionalField(values.assigneeProperty),
-      subIssues: subIssues.parentProperty ? subIssues : undefined,
-      project: project.propertyName,
-      relatedDatabase: {
-        databaseId: project.databaseId,
-        title: relatedDatabaseTitle,
-        status: {
-          type: projectStatus.type,
-          name: projectStatus.name,
-          completedStatuses: projectStatus.completedStatuses,
-          doneName: projectStatus.doneName,
-        },
-      },
-    },
-  }
-}
+import {
+  OnboardFormValues,
+  normalizeValuesToStore,
+} from './utils/normalize-values'
 
 export default function ConfigurationForm({
   revalidate,
@@ -163,7 +105,7 @@ export default function ConfigurationForm({
       // Set default values
       setValue('titleProperty', database.columns.title[0] || '')
       setValue('dateProperty', database.columns.date[0] || '')
-      setValue('statusProperty', database.columns.status[0]?.data.name || '')
+      setValue('statusProperty', database.columns.status[0]?.value || '')
       setValue('tagsProperty', database.columns.tags[0]?.value || '')
       setValue('assigneeProperty', database.columns.assignee[0]?.value || '')
       setValue('urlProperty', database.columns.url[0]?.value || '')
