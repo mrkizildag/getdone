@@ -1,9 +1,9 @@
 import { Action, Icon, Keyboard } from '@raycast/api'
 
-/** Vim/yazi-style "climb out" binding. */
+/** Shift+Tab climbs a level, mirroring Tab. */
 export const BACK_TO_PARENT_SHORTCUT: Keyboard.Shortcut = {
-  modifiers: ['ctrl'],
-  key: 'h',
+  modifiers: ['shift'],
+  key: 'tab',
 }
 
 interface BackToParentActionProps {
