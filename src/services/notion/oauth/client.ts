@@ -8,5 +8,5 @@ export const oauthClient = new OAuth.PKCEClient({
   // and force them through Notion authorization again for no visible gain.
   providerId: 'hypersonic',
   providerIcon: 'notion-logo.png',
-  description: 'Connect your Notion account to getdone',
+  description: 'Connect your Notion account to GetDone',
 })

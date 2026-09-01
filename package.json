@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "getdone",
-  "title": "getdone",
+  "title": "GetDone",
   "description": "Fast Notion task manager with sub-issue navigation",
   "icon": "icon.png",
   "author": "mrkizildag",
@@ -22,14 +22,14 @@
     {
       "name": "index",
       "title": "My Tasks",
-      "subtitle": "getdone",
+      "subtitle": "GetDone",
       "description": "Fastest Notion task manager",
       "mode": "view"
     },
     {
       "name": "active-todos",
       "title": "Active Tasks",
-      "subtitle": "getdone",
+      "subtitle": "GetDone",
       "description": "See your active tasks",
       "mode": "menu-bar",
       "interval": "5m"

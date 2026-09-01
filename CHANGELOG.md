@@ -1,4 +1,4 @@
-# getdone Changelog
+# GetDone Changelog
 
 ## [Sub-issues and rename] - 2026-09-01
 
@@ -20,7 +20,7 @@
 
 #### Updated
 
-- Renamed from Hypersonic to getdone, with a new icon
+- Renamed from Hypersonic to GetDone, with a new icon
 - One paginated fetch replaces the per-level Notion query, so moving through
   the tree is instant
 
