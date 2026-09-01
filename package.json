@@ -37,7 +37,7 @@
   ],
   "preferences": [],
   "dependencies": {
-    "@notionhq/client": "2.2.0",
+    "@notionhq/client": "5.26.0",
     "@raycast/api": "1.48.5",
     "@raycast/utils": "1.5.2",
     "chrono-node": "2.10.1",
