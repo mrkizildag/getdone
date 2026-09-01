@@ -1,7 +1,5 @@
 import { useDatabases } from '@/services/notion/hooks/use-databases'
-import { NONE_VALUE } from '@/services/notion/operations/get-databases'
-import { formatNotionUrl } from '@/services/notion/utils/format-notion-url'
-import { Preferences, storePreferences } from '@/services/storage'
+import { storePreferences } from '@/services/storage'
 import { Database } from '@/types/database'
 import {
   Action,
