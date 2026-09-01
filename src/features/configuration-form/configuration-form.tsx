@@ -276,7 +276,7 @@ export default function ConfigurationForm({
         id="subIssuesProperty"
         value={values.subIssuesProperty}
         onChange={(v) => setValue('subIssuesProperty', v)}
-        info="Self-referencing relation pointing at a task's parent. Enables drilling into sub-issues with Ctrl+L and back out with Ctrl+H. When set, the main list shows only top-level tasks."
+        info="Choose the property that points at a task's PARENT (in Notion's default sub-item setup that is 'Parent item', not 'Sub-item'). Enables drilling into sub-issues with Tab and back out with Shift+Tab. When set, the main list shows only top-level tasks."
         storeValue
       >
         {database?.columns.subIssues?.map((item, index) => (
