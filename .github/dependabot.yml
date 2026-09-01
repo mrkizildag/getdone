@@ -1,0 +1,26 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      dev-tooling:
+        patterns:
+          - '@typescript-eslint/*'
+          - 'eslint*'
+          - 'prettier'
+          - 'vitest'
+          - '@vitest/*'
+    ignore:
+      # Pinned to the Raycast runtime the extension is built against; bumping
+      # these is a deliberate migration, not a routine dependency update.
+      - dependency-name: '@raycast/api'
+      - dependency-name: '@types/node'
+      - dependency-name: 'typescript'
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

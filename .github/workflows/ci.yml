@@ -1,0 +1,89 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# A newer push to the same branch makes the in-flight run irrelevant.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  # @raycast/api's postinstall runs bin/ray, which ships an arm64 macOS binary
+  # only and fails on a Linux runner. Nothing in the checks below needs it:
+  # tsc, eslint, prettier and vitest all run from plain node_modules.
+  NPM_INSTALL: npm ci --ignore-scripts
+
+jobs:
+  quality:
+    name: Types, lint, format, tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: $NPM_INSTALL
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint:ci
+
+      - name: Check formatting
+        run: npm run format:check
+
+      - name: Test with coverage
+        run: npm run test:coverage
+
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage/
+          if-no-files-found: ignore
+          retention-days: 14
+
+  security:
+    name: Dependency and secret scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # gitleaks diffs the history, so a shallow clone would hide most of it.
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: $NPM_INSTALL
+
+      - name: Audit dependencies (blocking on critical)
+        # The extension inherits several high-severity advisories from the
+        # versions upstream pinned for @raycast/api 1.48.5, so gating at `high`
+        # would fail every PR on pre-existing debt. Critical is the gate; the
+        # full report below keeps the rest visible rather than silently passing.
+        run: npm audit --audit-level=critical
+
+      - name: Full audit report (informational)
+        if: always()
+        run: npm audit || true
+
+      - name: Scan for committed secrets
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
