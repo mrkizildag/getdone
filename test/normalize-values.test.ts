@@ -14,7 +14,9 @@ const STATUS = {
 
 const SUB_ISSUES = { parentProperty: 'Parent item', childProperty: 'Sub-item' }
 
-const values = (overrides: Partial<OnboardFormValues> = {}): OnboardFormValues => ({
+const values = (
+  overrides: Partial<OnboardFormValues> = {}
+): OnboardFormValues => ({
   mainDatabase: JSON.stringify({
     id: 'db',
     name: 'Tasks',

@@ -15,28 +15,18 @@ export function useTodos({
   databaseId,
   filter,
   accessoryConfig,
-  parentId = null,
-  scopeToLevel = false,
 }: {
   databaseId: string
   filter: Filter
   accessoryConfig: AccessoryConfig | null
-  parentId?: string | null
-  scopeToLevel?: boolean
 }) {
   const { push } = useNavigation()
   const { data, error, isLoading, mutate, revalidate } = useCachedPromise(
-    async (databaseId, filter, accessoryConfig, parentId, scopeToLevel) => {
-      const todos = await getTodos({
-        databaseId,
-        filter,
-        accessoryConfig,
-        parentId,
-        scopeToLevel,
-      })
+    async (databaseId, filter, accessoryConfig) => {
+      const todos = await getTodos({ databaseId, filter, accessoryConfig })
       return todos
     },
-    [databaseId, filter, accessoryConfig, parentId, scopeToLevel],
+    [databaseId, filter, accessoryConfig],
     {
       initialData: [],
       keepPreviousData: true,

@@ -43,8 +43,7 @@ You can filter your task by user, project or label. Combining multiple filter yo
 Notion's native sub-items are supported as a browsable tree. Pick the
 self-referencing relation that points at a task's parent under **Sub-issues** in
 the database settings, then navigate the tree the way you would in yazi:
-`⌘ + ⇧ + L` descends into the selected task's sub-issues, `⌘ + ⇧ + H` climbs
-back out.
+`⇥` descends into the selected task's sub-issues, `⇧ + ⇥` climbs back out.
 The current path is shown in the window title, and a chevron badge on each row
 shows how many sub-issues it holds.
 
@@ -68,8 +67,8 @@ Hypersonic**.
 ### List of commands
 
 - Press `↵` to complete a task or create a new one.
-- Press `⌘ + ⇧ + L` to drill into a task's sub-issues.
-- Press `⌘ + ⇧ + H` to climb back out one level.
+- Press `⇥` to drill into a task's sub-issues.
+- Press `⇧ + ⇥` to climb back out one level.
 - Press `⌘ + ⇧ + O` to toggle between top-level-only and all issues.
 - Press `⌘ + ↵` to set a status.
 - Press `⌘ + F` to filter your tasks.
