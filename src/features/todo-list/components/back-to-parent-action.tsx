@@ -1,13 +1,9 @@
 import { Action, Icon, Keyboard } from '@raycast/api'
 
-/**
- * Vim/yazi-style "climb out" binding. Plain ctrl+h is worse than unusable: macOS
- * binds it to deleteBackward:, so in a focused search field it edits the query
- * instead of navigating.
- */
+/** Shift+Tab climbs a level, mirroring Tab. */
 export const BACK_TO_PARENT_SHORTCUT: Keyboard.Shortcut = {
-  modifiers: ['cmd', 'shift'],
-  key: 'h',
+  modifiers: ['shift'],
+  key: 'tab',
 }
 
 interface BackToParentActionProps {
