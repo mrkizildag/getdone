@@ -14,7 +14,7 @@ export function DeleteTodoAction({
       title={'Delete'}
       style={Action.Style.Destructive}
       onAction={() => onDelete(todo.id)}
-      shortcut={{ modifiers: ['cmd'], key: 'delete' }}
+      shortcut={{ modifiers: ['ctrl'], key: 'x' }}
     />
   )
 }

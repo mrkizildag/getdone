@@ -21,7 +21,7 @@ export function GeneralActions({
         title="Open Extension Preferences"
         icon={Icon.Gear}
         onAction={openCommandPreferences}
-        shortcut={{ modifiers: ['cmd'], key: ',' }}
+        shortcut={{ modifiers: ['cmd', 'shift'], key: 'p' }}
       />
       <Action.OpenInBrowser
         title="Drop us a Line"
