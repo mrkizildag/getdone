@@ -34,6 +34,8 @@ import { useIsNotionInstalled } from '@/services/notion/hooks/use-is-notion-inst
 import { useStatuses } from '@/services/notion/hooks/use-get-statuses'
 import { setStatusTodo } from '@/services/notion/operations/set-status-todo'
 import { Status } from '@/types/status'
+import { useAccessoryConfig } from '@/features/accessory-config/use-accessory-config'
+import { AccessoryConfig } from '@/types/accessory-config'
 
 export function useTodoList() {
   const [newTodo, setNewTodo] = useState<Todo | null>(null)
@@ -42,9 +44,44 @@ export function useTodoList() {
 
   const { preferences, revalidatePreferences } = useLocalPreferences()
   const { statuses } = useStatuses(preferences.databaseName)
+  const { accessoryConfig: storedAccessoryConfig } = useAccessoryConfig(
+    preferences.databaseId
+  )
+
+  const accessoryConfig = useMemo<AccessoryConfig | null>(() => {
+    if (!preferences.databaseId) return null
+
+    const reservedPropertyNames = new Set(
+      [
+        preferences.properties?.title,
+        preferences.properties?.date,
+        preferences.properties?.url,
+        preferences.properties?.tag,
+        preferences.properties?.project,
+        preferences.properties?.assignee,
+        preferences.properties?.status?.name,
+      ].filter((name): name is string => Boolean(name))
+    )
+
+    const baseConfig: AccessoryConfig = storedAccessoryConfig ?? {
+      databaseId: preferences.databaseId,
+      slots: [
+        { propertyName: 'Course', propertyType: 'select', visible: true },
+      ],
+    }
+
+    return {
+      ...baseConfig,
+      slots: baseConfig.slots.filter(
+        (slot) => !reservedPropertyNames.has(slot.propertyName)
+      ),
+    }
+  }, [storedAccessoryConfig, preferences])
+
   const { todos, isLoading, mutate } = useTodos({
     databaseId: preferences.databaseId,
     filter: filterTodo,
+    accessoryConfig,
   })
 
   const { projects, projectsById } = useProjects(
@@ -528,5 +565,6 @@ export function useTodoList() {
     searchText,
     mutatePreferences: revalidatePreferences,
     isNotionInstalled,
+    accessoryConfig,
   }
 }

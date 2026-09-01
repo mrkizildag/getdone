@@ -1,40 +1,26 @@
 import { Filter } from '@/types/filter'
 import { Project } from '@/types/project'
 import { Todo } from '@/types/todo'
-import { Color, Image } from '@raycast/api'
+import { AccessoryConfig } from '@/types/accessory-config'
+import { Color, Image, List } from '@raycast/api'
 import { getAvatarIcon } from '@raycast/utils'
 import { format } from 'date-fns'
+import { getRenderer } from '@/services/accessories/renderer-registry'
 
 export function createAccessoriesArray({
   todo,
   projectsById,
   filter,
   showStatus = true,
+  accessoryConfig,
 }: {
   todo: Partial<Todo>
   projectsById: Record<string, Project>
   filter?: Filter
   showStatus?: boolean
-}) {
-  const accessories = []
-
-  if (todo.date) {
-    const icon =
-      todo.date < new Date()
-        ? {
-            icon: {
-              source: 'calendar-cross.svg',
-              tintColor: Color.Red,
-            },
-          }
-        : {}
-
-    accessories.push({
-      ...icon,
-      date: todo.date,
-      tooltip: format(todo.date, "EEEE d MMMM yyyy 'at' HH:mm"),
-    })
-  }
+  accessoryConfig?: AccessoryConfig | null
+}): List.Item.Accessory[] {
+  const accessories: List.Item.Accessory[] = []
 
   if (todo.projectId && !filter?.projectId) {
     const project = projectsById[todo.projectId]
@@ -76,5 +62,29 @@ export function createAccessoriesArray({
     })
   }
 
-  return accessories
+  const configuredAccessories = (accessoryConfig?.slots ?? [])
+    .filter((slot) => slot.visible)
+    .flatMap((slot) => {
+      const value = todo.extraProperties?.[slot.propertyName]
+      if (!value) return []
+
+      return getRenderer(slot.propertyType).render(value, {
+        slot,
+        projectsById,
+      })
+    })
+
+  const dateAccessory: List.Item.Accessory[] = todo.date
+    ? [
+        {
+          ...(todo.date < new Date()
+            ? { icon: { source: 'calendar-cross.svg', tintColor: Color.Red } }
+            : {}),
+          date: todo.date,
+          tooltip: format(todo.date, "EEEE d MMMM yyyy 'at' HH:mm"),
+        },
+      ]
+    : []
+
+  return [...accessories, ...configuredAccessories, ...dateAccessory]
 }

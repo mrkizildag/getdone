@@ -1,6 +1,7 @@
 import { Status } from './status'
 import { Tag } from './tag'
 import { User } from './user'
+import { NotionPropertyValue } from './notion-property-value'
 
 export interface Todo {
   id: string
@@ -16,4 +17,5 @@ export interface Todo {
   date?: Date | null
   dateValue?: string | null
   status?: Status | Partial<Status> | null
+  extraProperties?: Record<string, NotionPropertyValue>
 }

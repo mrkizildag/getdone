@@ -13,6 +13,7 @@ export function MenuBar() {
   const { todos, error, isLoading, mutate } = useTodos({
     databaseId: preferences.databaseId,
     filter: filterTodo,
+    accessoryConfig: null,
   })
 
   const handleComplete = async (todo: Todo) => {

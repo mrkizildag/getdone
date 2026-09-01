@@ -1,5 +1,6 @@
 import { getTodos } from '@/services/notion/operations/get-todos'
 import { Filter } from '@/types/filter'
+import { AccessoryConfig } from '@/types/accessory-config'
 import {
   Alert,
   LaunchType,
@@ -13,17 +14,19 @@ import ConfigurationForm from '@/features/configuration-form/configuration-form'
 export function useTodos({
   databaseId,
   filter,
+  accessoryConfig,
 }: {
   databaseId: string
   filter: Filter
+  accessoryConfig: AccessoryConfig | null
 }) {
   const { push } = useNavigation()
   const { data, error, isLoading, mutate, revalidate } = useCachedPromise(
-    async (databaseId, filter) => {
-      const todos = await getTodos({ databaseId, filter })
+    async (databaseId, filter, accessoryConfig) => {
+      const todos = await getTodos({ databaseId, filter, accessoryConfig })
       return todos
     },
-    [databaseId, filter],
+    [databaseId, filter, accessoryConfig],
     {
       initialData: [],
       keepPreviousData: true,

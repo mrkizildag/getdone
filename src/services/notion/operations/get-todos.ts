@@ -3,13 +3,16 @@ import { notion } from '../client'
 import { loadPreferences } from '@/services/storage'
 import { normalizeTodo } from '../utils/normalize-todo'
 import { Filter } from '@/types/filter'
+import { AccessoryConfig } from '@/types/accessory-config'
 
 export async function getTodos({
   databaseId,
   filter,
+  accessoryConfig,
 }: {
   databaseId: string
   filter: Filter
+  accessoryConfig: AccessoryConfig | null
 }): Promise<Todo[]> {
   const notionClient = await notion()
   const preferences = await loadPreferences()
@@ -96,6 +99,7 @@ export async function getTodos({
     normalizeTodo({
       page,
       preferences: preferences.properties,
+      accessoryConfig,
     })
   )
 

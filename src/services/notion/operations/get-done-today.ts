@@ -71,6 +71,10 @@ export async function getDoneToday(
   })
 
   return response.results.map((page) =>
-    normalizeTodo({ page, preferences: preferences.properties })
+    normalizeTodo({
+      page,
+      preferences: preferences.properties,
+      accessoryConfig: null,
+    })
   )
 }

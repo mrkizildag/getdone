@@ -1,6 +1,8 @@
 import { Preferences } from '@/services/storage'
 import { Todo } from '@/types/todo'
 import { User } from '@/types/user'
+import { AccessoryConfig } from '@/types/accessory-config'
+import { NotionPropertyValue } from '@/types/notion-property-value'
 import { formatNotionUrl } from './format-notion-url'
 import { getContentUrl } from './get-content-url'
 import { normalizeTag } from './normalize-tag'
@@ -9,9 +11,11 @@ import { normalizeUser } from './normalize-user'
 export const normalizeTodo = ({
   page,
   preferences,
+  accessoryConfig,
 }: {
   page: any
   preferences: Preferences['properties']
+  accessoryConfig: AccessoryConfig | null
 }): Todo => {
   const dateValue = page.properties[preferences.date]?.date?.start || null
 
@@ -28,6 +32,10 @@ export const normalizeTodo = ({
     page.properties[preferences.title]?.title[0]?.text?.content || 'Untitled'
 
   const titleWithGlyph = contentUrl ? `${title} ↗` : title
+
+  const extraProperties = accessoryConfig
+    ? extractExtraProperties(page, accessoryConfig)
+    : {}
 
   return {
     id: page.id,
@@ -51,7 +59,23 @@ export const normalizeTodo = ({
       : null,
     dateValue: dateValue,
     date: dateValue ? new Date(dateValue) : null,
+    extraProperties,
   }
+}
+
+const extractExtraProperties = (
+  page: any,
+  accessoryConfig: AccessoryConfig
+): Record<string, NotionPropertyValue> => {
+  return accessoryConfig.slots.reduce<Record<string, NotionPropertyValue>>(
+    (acc, slot) => {
+      const raw = page.properties[slot.propertyName]
+      if (!raw || raw.type !== slot.propertyType) return acc
+
+      return { ...acc, [slot.propertyName]: raw as NotionPropertyValue }
+    },
+    {}
+  )
 }
 
 const normalizeUserOrPeople = (item: any): User | null => {

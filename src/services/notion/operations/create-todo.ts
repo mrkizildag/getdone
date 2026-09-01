@@ -67,6 +67,7 @@ export async function createTodo(
   const normalizedTodo = normalizeTodo({
     page: data,
     preferences: preferences.properties,
+    accessoryConfig: null,
   })
 
   return normalizedTodo

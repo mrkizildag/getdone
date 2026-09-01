@@ -18,6 +18,23 @@ import { OpenInNotionAction } from './components/open-in-notion-action'
 import { OpenOnNotionAction } from './components/open-on-notion'
 import { OpenAttachedLink } from './components/open-attached-link'
 import { SetStatusAction } from './components/set-todo-status-action'
+import { getRenderer } from '@/services/accessories/renderer-registry'
+import { Todo } from '@/types/todo'
+import { AccessoryConfig } from '@/types/accessory-config'
+
+function getExtraKeywords(
+  todo: Todo,
+  accessoryConfig: AccessoryConfig | null
+): string[] {
+  if (!accessoryConfig) return []
+
+  return accessoryConfig.slots.flatMap((slot) => {
+    const value = todo.extraProperties?.[slot.propertyName]
+    if (!value) return []
+
+    return getRenderer(slot.propertyType).getSearchKeywords(value)
+  })
+}
 
 export function TodoList() {
   const {
@@ -50,6 +67,7 @@ export function TodoList() {
     resetFilter,
     mutatePreferences,
     isNotionInstalled,
+    accessoryConfig,
   } = useTodoList()
 
   const filterCount = useMemo(() => {
@@ -60,6 +78,31 @@ export function TodoList() {
     if (filterTodo.status) amount++
     return amount
   }, [filterTodo])
+
+  const todoMeta = useMemo(() => {
+    const meta: Record<
+      string,
+      { accessories: List.Item.Accessory[]; keywords: string[] }
+    > = {}
+
+    for (const statusId of Object.keys(todos)) {
+      const list = todos[statusId] ?? []
+      for (const todo of list) {
+        meta[todo.id] = {
+          accessories: createAccessoriesArray({
+            todo,
+            projectsById,
+            filter: filterTodo,
+            showStatus: false,
+            accessoryConfig,
+          }),
+          keywords: getExtraKeywords(todo, accessoryConfig),
+        }
+      }
+    }
+
+    return meta
+  }, [todos, projectsById, filterTodo, accessoryConfig])
 
   return (
     <List
@@ -75,6 +118,7 @@ export function TodoList() {
           accessories={createAccessoriesArray({
             todo: newTodo,
             projectsById,
+            accessoryConfig,
           })}
           actions={
             <ActionPanel>
@@ -108,6 +152,7 @@ export function TodoList() {
           accessories={createAccessoriesArray({
             todo: filterTodo,
             projectsById,
+            accessoryConfig,
           })}
           actions={
             <ActionPanel>
@@ -145,6 +190,7 @@ export function TodoList() {
             subtitle={numberOfIssues}
           >
             {todos[status.id]?.map((todo) => {
+              const meta = todoMeta[todo.id]
               return (
                 <List.Item
                   key={todo.id}
@@ -155,12 +201,8 @@ export function TodoList() {
                       : Color.SecondaryText,
                   }}
                   title={todo.title}
-                  accessories={createAccessoriesArray({
-                    todo,
-                    projectsById,
-                    filter: filterTodo,
-                    showStatus: false,
-                  })}
+                  keywords={meta?.keywords}
+                  accessories={meta?.accessories ?? []}
                   actions={
                     <ActionPanel>
                       <CompleteTodoAction
