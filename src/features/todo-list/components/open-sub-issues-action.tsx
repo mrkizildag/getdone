@@ -1,9 +1,14 @@
 import { Action, Icon, Keyboard } from '@raycast/api'
 import { Todo } from '@/types/todo'
 
-/** Vim/yazi-style "descend into" binding. */
+/**
+ * Vim/yazi-style "descend into" binding. Keeps the `l` of hjkl, but plain ctrl+l
+ * is unusable here: macOS binds it to centerSelectionInVisibleArea: in its
+ * standard key bindings, and a Raycast List keeps the search field focused, so
+ * the field swallows the keypress before any action ever sees it.
+ */
 export const OPEN_SUB_ISSUES_SHORTCUT: Keyboard.Shortcut = {
-  modifiers: ['ctrl'],
+  modifiers: ['cmd', 'shift'],
   key: 'l',
 }
 
