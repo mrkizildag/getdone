@@ -1,3 +1,7 @@
+> **This is a fork.** Upstream Hypersonic is by [reboot.studio](https://www.raycast.com/reboot/hypersonic)
+> and lives in [`raycast/extensions`](https://github.com/raycast/extensions/tree/main/extensions/hypersonic).
+> This fork adds sub-issue support and in-extension editing of a task's body.
+
 <p align="center">
 <img width=180 src="https://user-images.githubusercontent.com/42417619/203419063-8281b9d0-6fba-4c6c-b381-cdf59ee42e18.png">
 </p>
