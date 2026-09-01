@@ -1,4 +1,5 @@
 import { LocalStorage } from '@raycast/api'
+import { SubIssuesConfig } from '@/types/sub-issues'
 
 export type Preferences = {
   databaseUrl: string
@@ -20,6 +21,7 @@ export type Preferences = {
     tag?: string
     assignee?: string
     project?: string
+    subIssues?: SubIssuesConfig
     relatedDatabase?: {
       databaseId?: string
       title?: string

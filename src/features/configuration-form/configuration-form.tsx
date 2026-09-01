@@ -24,6 +24,7 @@ type OnboardFormValues = {
   assigneeProperty: string
   projectProperty: string
   projectStatusProperty: string
+  subIssuesProperty: string
 }
 
 const handleOptionalField = (value: string): string | undefined => {
@@ -38,6 +39,7 @@ const normalizeValuesToStore = (
   const project = JSON.parse(values.projectProperty || '{}')
   const status = JSON.parse(values.statusProperty || '{}')
   const projectStatus = JSON.parse(values.projectStatusProperty || '{}')
+  const subIssues = JSON.parse(values.subIssuesProperty || '{}')
 
   return {
     databaseId: mainDatabase.id,
@@ -58,6 +60,7 @@ const normalizeValuesToStore = (
       },
       tag: handleOptionalField(values.tagsProperty),
       assignee: handleOptionalField(values.assigneeProperty),
+      subIssues: subIssues.parentProperty ? subIssues : undefined,
       project: project.propertyName,
       relatedDatabase: {
         databaseId: project.databaseId,
@@ -128,6 +131,7 @@ export default function ConfigurationForm({
       assigneeProperty: '',
       projectProperty: '',
       projectStatusProperty: '',
+      subIssuesProperty: '',
     },
   })
 
@@ -146,6 +150,7 @@ export default function ConfigurationForm({
       setValue('tagsProperty', database.columns.tags[0]?.value || '')
       setValue('assigneeProperty', database.columns.assignee[0]?.value || '')
       setValue('urlProperty', database.columns.url[0]?.value || '')
+      setValue('subIssuesProperty', database.columns.subIssues[0]?.value || '')
       // Handle project property
       const project = database.columns.project[0]?.value || ''
       setValue('projectProperty', project)
@@ -304,6 +309,26 @@ export default function ConfigurationForm({
             key={`${item}-${index}`}
             value={item.value}
             title={item.name}
+          />
+        ))}
+      </Form.Dropdown>
+      <Form.Dropdown
+        title="Sub-issues"
+        id="subIssuesProperty"
+        value={values.subIssuesProperty}
+        onChange={(v) => setValue('subIssuesProperty', v)}
+        info="Self-referencing relation pointing at a task's parent. Enables drilling into sub-issues with Ctrl+L and back out with Ctrl+H. When set, the main list shows only top-level tasks."
+        storeValue
+      >
+        {database?.columns.subIssues.map((item, index) => (
+          <Form.Dropdown.Item
+            key={`${item.data.parentProperty}-${index}`}
+            value={item.value}
+            title={
+              item.data.childProperty
+                ? `${item.data.parentProperty} \u2192 ${item.data.childProperty}`
+                : item.data.parentProperty
+            }
           />
         ))}
       </Form.Dropdown>

@@ -2,7 +2,7 @@ import { Filter } from '@/types/filter'
 import { Project } from '@/types/project'
 import { Todo } from '@/types/todo'
 import { AccessoryConfig } from '@/types/accessory-config'
-import { Color, Image, List } from '@raycast/api'
+import { Color, Icon, Image, List } from '@raycast/api'
 import { getAvatarIcon } from '@raycast/utils'
 import { format } from 'date-fns'
 import { getRenderer } from '@/services/accessories/renderer-registry'
@@ -59,6 +59,15 @@ export function createAccessoriesArray({
         mask: Image.Mask.Circle,
       },
       tooltip: todo.user.name,
+    })
+  }
+
+  const subIssueCount = todo.subIssueIds?.length ?? 0
+  if (subIssueCount > 0) {
+    accessories.push({
+      icon: Icon.ChevronRight,
+      text: `${subIssueCount}`,
+      tooltip: `${subIssueCount} sub-issue${subIssueCount === 1 ? '' : 's'}`,
     })
   }
 

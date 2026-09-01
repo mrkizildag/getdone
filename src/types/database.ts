@@ -1,3 +1,5 @@
+import { SubIssuesConfig } from './sub-issues'
+
 type Relation = {
   databaseId: string
   propertyName: string
@@ -33,6 +35,7 @@ export type Database = {
     date: string[]
     status: TypeWithValue<Status>[]
     project: TypeWithValue<Relation>[]
+    subIssues: TypeWithValue<SubIssuesConfig>[]
     assignee: OptionalColumn[]
     tags: OptionalColumn[]
     url: OptionalColumn[]
