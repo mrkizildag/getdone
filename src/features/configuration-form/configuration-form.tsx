@@ -12,7 +12,8 @@ import {
   useNavigation,
 } from '@raycast/api'
 import { FormValidation, useCachedState, useForm } from '@raycast/utils'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { withKnownColumns } from './utils/known-columns'
 
 type OnboardFormValues = {
   mainDatabase: string
@@ -86,11 +87,27 @@ export default function ConfigurationForm({
   const { databases, isLoading } = useDatabases()
   const { pop } = useNavigation()
 
-  const [database, setDatabase] = useCachedState<Database | null>(
+  const [cachedDatabase, setDatabase] = useCachedState<Database | null>(
     'synced-database',
     null
   )
   const [secondaryDb, setSecondaryDb] = useState<Database | null>(null)
+
+  // The cache may have been written by a build that knew about fewer columns.
+  const database = withKnownColumns(cachedDatabase)
+
+  // That cached copy is also a snapshot of the schema as it stood when the
+  // database was last picked. Refresh it once the live list arrives, so a
+  // property added in Notion since then shows up without the user having to
+  // re-select the database.
+  useEffect(() => {
+    if (!cachedDatabase) return
+
+    const live = databases.find((item) => item.id === cachedDatabase.id)
+    if (live && JSON.stringify(live) !== JSON.stringify(cachedDatabase)) {
+      setDatabase(live)
+    }
+  }, [databases, cachedDatabase, setDatabase])
 
   const { handleSubmit, values, setValue } = useForm<OnboardFormValues>({
     async onSubmit(values) {
@@ -320,7 +337,7 @@ export default function ConfigurationForm({
         info="Self-referencing relation pointing at a task's parent. Enables drilling into sub-issues with Ctrl+L and back out with Ctrl+H. When set, the main list shows only top-level tasks."
         storeValue
       >
-        {database?.columns.subIssues.map((item, index) => (
+        {database?.columns.subIssues?.map((item, index) => (
           <Form.Dropdown.Item
             key={`${item.data.parentProperty}-${index}`}
             value={item.value}

@@ -165,11 +165,15 @@ const normalizeColumns = (
 
   return {
     ...columns,
+    // None leads so that defaulting to the first option leaves sub-issues off:
+    // enabling them changes which tasks the main list shows, which should be a
+    // deliberate choice rather than something an upgrade does silently. The
+    // most parent-looking relation sorts directly beneath it.
     subIssues: [
+      NONE_SUB_ISSUES,
       ...[...columns.subIssues].sort(
         (a, b) => parentLikelihood(b) - parentLikelihood(a)
       ),
-      NONE_SUB_ISSUES,
     ],
   }
 }
