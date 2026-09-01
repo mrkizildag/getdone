@@ -230,7 +230,7 @@ export function useTodoList() {
       refreshMenuBar()
 
       if (action === 'SHARE') {
-        await Clipboard.copy(`Added to GetDone: ${createdTodo.shareUrl}`)
+        await Clipboard.copy(`Added to getdone: ${createdTodo.shareUrl}`)
         await showHUD('Copied to Clipboard')
       }
 

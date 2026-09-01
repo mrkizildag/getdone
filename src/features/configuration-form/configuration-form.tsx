@@ -144,7 +144,7 @@ export default function ConfigurationForm({
         title="Database"
         value={values.mainDatabase}
         onChange={handleChangeMainDatabase}
-        info="Select the database where you will create tasks through GetDone"
+        info="Select the database where you will create tasks through getdone"
         storeValue
       >
         {databases.map((item) => (

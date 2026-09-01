@@ -1,4 +1,4 @@
-> **GetDone is a fork of [Hypersonic](https://www.raycast.com/reboot/hypersonic)** by
+> **getdone is a fork of [Hypersonic](https://www.raycast.com/reboot/hypersonic)** by
 > reboot.studio, which lives in
 > [`raycast/extensions`](https://github.com/raycast/extensions/tree/main/extensions/hypersonic).
 > It adds sub-issue navigation, and fixes several bugs in the original.
@@ -7,29 +7,29 @@
 <img width=180 src="assets/icon.png">
 </p>
 
-<h1 align="center">GetDone</h1>
+<h1 align="center">getdone</h1>
 
 <h4 align="center">
 Fast Notion task manager, with sub-issues
 </h4>
 
-## Introducing GetDone for Teams
+## Introducing getdone for Teams
 
 **[Watch video presentation](https://www.loom.com/share/1f4c369a32794c779458bbfbcdf27494)**
 
-![GetDone interface](/metadata/hypersonic-1.png)
+![getdone interface](/metadata/hypersonic-1.png)
 
 ### Connect any Notion database
 
 Sign in with your Notion account and connect your project and task databases.
 
-We automatically detect the right properties in your database to display on GetDone. You can also configure additional properties as labels, users or related databases.
+We automatically detect the right properties in your database to display on getdone. You can also configure additional properties as labels, users or related databases.
 
 ![Notion connection](/metadata/hypersonic-5.png)
 
 ### Create and assign tasks using natural language
 
-You can manage your tasks faster than ever in GetDone. We use natural language recognition to separate the task from its metadata, so you just need to type.
+You can manage your tasks faster than ever in getdone. We use natural language recognition to separate the task from its metadata, so you just need to type.
 
 ![Natural language](/metadata/hypersonic-2.png)
 
@@ -63,7 +63,7 @@ under that parent. The menu bar command is unaffected and always lists every
 active task, nested or not.
 
 All three shortcuts can be rebound in Raycast under **Settings → Extensions →
-GetDone**.
+getdone**.
 
 ### List of commands
 
@@ -85,7 +85,7 @@ GetDone**.
 - Press `⌃ + X` to delete a task.
 - Press `⌘ + T` to share your work.
 - Press `⌘ + N` to open Notion database.
-- Press `⌘ + ⇧ + A` to authorize GetDone with Notion.
+- Press `⌘ + ⇧ + A` to authorize getdone with Notion.
 - Press `⌘ + ⇧ + ,` to open database settings.
 - Press `⌘ + ⇧ + P` to open extension preferences.
 - Press `⌘ + ⇧ + M` to contact us.
