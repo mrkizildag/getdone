@@ -9,10 +9,19 @@ export async function getTodos({
   databaseId,
   filter,
   accessoryConfig,
+  parentId = null,
+  scopeToLevel = false,
 }: {
   databaseId: string
   filter: Filter
   accessoryConfig: AccessoryConfig | null
+  /** Show this task's children. `null` shows the top level of the tree. */
+  parentId?: string | null
+  /**
+   * Restrict results to a single level of the tree. Off by default so flat
+   * consumers such as the menu bar keep seeing every task, nested or not.
+   */
+  scopeToLevel?: boolean
 }): Promise<Todo[]> {
   const notionClient = await notion()
   const preferences = await loadPreferences()
@@ -38,6 +47,24 @@ export async function getTodos({
       }))
     }
   }
+
+  // With sub-issues configured the list becomes a tree: the root level holds
+  // only parentless tasks, and drilling in scopes the query to one parent.
+  const subIssues = preferences.properties.subIssues
+  const hierarchyQuery =
+    subIssues && scopeToLevel
+      ? [
+          parentId
+            ? {
+                property: subIssues.parentProperty,
+                relation: { contains: parentId },
+              }
+            : {
+                property: subIssues.parentProperty,
+                relation: { is_empty: true },
+              },
+        ]
+      : []
 
   const dynamicFiltersQuery = [
     ...(filter?.projectId && preferences.properties.project
@@ -79,6 +106,7 @@ export async function getTodos({
     filter: {
       and: [
         ...(!filter.status?.id ? donePropertyQuery : []),
+        ...hierarchyQuery,
         ...dynamicFiltersQuery,
       ],
     },

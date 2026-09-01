@@ -38,9 +38,38 @@ You can filter your task by user, project or label. Combining multiple filter yo
 
 ![Smart filtering](/metadata/hypersonic-3.png)
 
+### Sub-issues
+
+Notion's native sub-items are supported as a browsable tree. Pick the
+self-referencing relation that points at a task's parent under **Sub-issues** in
+the database settings, then navigate the tree the way you would in yazi:
+`⌃ + L` descends into the selected task's sub-issues, `⌃ + H` climbs back out.
+The current path is shown in the window title, and a chevron badge on each row
+shows how many sub-issues it holds.
+
+Two views, toggled with `⌘ + ⇧ + O`:
+
+- **Top-level only** (default) — the main list shows tasks that aren't nested
+  inside another task. Leaf tasks and parent tasks sit side by side; only the
+  children are tucked away one level down.
+- **All issues** — the main list shows every task regardless of depth. Drilling
+  in still works, so you can jump from a sub-issue's siblings straight into its
+  own children.
+
+Switching view returns you to the top, since a path through the tree has no
+meaning in the flat view. A task created inside a level is automatically filed
+under that parent. The menu bar command is unaffected and always lists every
+active task, nested or not.
+
+All three shortcuts can be rebound in Raycast under **Settings → Extensions →
+Hypersonic**.
+
 ### List of commands
 
 - Press `↵` to complete a task or create a new one.
+- Press `⌃ + L` to drill into a task's sub-issues.
+- Press `⌃ + H` to climb back out one level.
+- Press `⌘ + ⇧ + O` to toggle between top-level-only and all issues.
 - Press `⌘ + ↵` to set a status.
 - Press `⌘ + F` to filter your tasks.
 - Press `⌘ + R` to edit the title of a task.

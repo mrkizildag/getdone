@@ -18,6 +18,9 @@ import { OpenInNotionAction } from './components/open-in-notion-action'
 import { OpenOnNotionAction } from './components/open-on-notion'
 import { OpenAttachedLink } from './components/open-attached-link'
 import { SetStatusAction } from './components/set-todo-status-action'
+import { OpenSubIssuesAction } from './components/open-sub-issues-action'
+import { BackToParentAction } from './components/back-to-parent-action'
+import { ToggleSubIssuesAction } from './components/toggle-sub-issues-action'
 import { getRenderer } from '@/services/accessories/renderer-registry'
 import { Todo } from '@/types/todo'
 import { AccessoryConfig } from '@/types/accessory-config'
@@ -68,7 +71,36 @@ export function TodoList() {
     mutatePreferences,
     isNotionInstalled,
     accessoryConfig,
+    hasSubIssueProperty,
+    subIssueNavigation,
+    handleOpenSubIssues,
+    handleGoBack,
+    handleToggleShowAllIssues,
   } = useTodoList()
+
+  const { currentParent, isNested, backTitle, showAllIssues, navigationTitle } =
+    subIssueNavigation
+
+  const currentLevelCount = useMemo(
+    () =>
+      Object.values(todos).reduce(
+        (total, list) => total + (list?.length ?? 0),
+        0
+      ),
+    [todos]
+  )
+
+  const backAction =
+    hasSubIssueProperty && isNested ? (
+      <BackToParentAction backTitle={backTitle} onBack={handleGoBack} />
+    ) : null
+
+  const toggleAction = hasSubIssueProperty ? (
+    <ToggleSubIssuesAction
+      showAllIssues={showAllIssues}
+      onToggle={handleToggleShowAllIssues}
+    />
+  ) : null
 
   const filterCount = useMemo(() => {
     let amount = 0
@@ -109,7 +141,12 @@ export function TodoList() {
       isLoading={loading}
       searchText={searchText}
       onSearchTextChange={onSearchTextChange}
-      searchBarPlaceholder="Search or create task"
+      navigationTitle={hasSubIssueProperty ? navigationTitle : undefined}
+      searchBarPlaceholder={
+        currentParent
+          ? `Search or create sub-issue in ${currentParent.title}`
+          : 'Search or create task'
+      }
     >
       {newTodo && newTodo.previewTitle ? (
         <List.Item
@@ -138,6 +175,38 @@ export function TodoList() {
                 onAction={() => handleCreate('OPEN')}
                 shortcut={{ modifiers: ['cmd'], key: 'o' }}
               />
+              {backAction}
+              {toggleAction}
+              <GeneralActions
+                mutatePreferences={mutatePreferences}
+                notionDbUrl={notionDbUrl}
+              />
+            </ActionPanel>
+          }
+        />
+      ) : null}
+      {isNested && currentParent ? (
+        <List.Item
+          icon={Icon.ChevronLeft}
+          title={currentParent.title}
+          subtitle="Sub-issues"
+          accessories={[
+            {
+              text:
+                currentLevelCount === 1
+                  ? '1 sub-issue'
+                  : `${currentLevelCount} sub-issues`,
+            },
+          ]}
+          actions={
+            <ActionPanel>
+              {backAction}
+              {toggleAction}
+              {isNotionInstalled ? (
+                <OpenInNotionAction url={currentParent.url} />
+              ) : (
+                <OpenOnNotionAction url={currentParent.shareUrl} />
+              )}
               <GeneralActions
                 mutatePreferences={mutatePreferences}
                 notionDbUrl={notionDbUrl}
@@ -209,6 +278,14 @@ export function TodoList() {
                         todo={todo}
                         onComplete={handleComplete}
                       />
+                      {hasSubIssueProperty && (
+                        <OpenSubIssuesAction
+                          todo={todo}
+                          onOpen={handleOpenSubIssues}
+                        />
+                      )}
+                      {backAction}
+                      {toggleAction}
                       {hasStatusProperty && statuses?.length > 0 && (
                         <SetStatusAction
                           todo={todo}
@@ -284,6 +361,7 @@ export function TodoList() {
       <EmptyList
         notionDbUrl={notionDbUrl}
         mutatePreferences={mutatePreferences}
+        actions={toggleAction}
       />
     </List>
   )

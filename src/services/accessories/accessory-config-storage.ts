@@ -6,7 +6,9 @@ const buildKey = (databaseId: string) => `ACCESSORY_CONFIG_${databaseId}`
 export const loadAccessoryConfig = async (
   databaseId: string
 ): Promise<AccessoryConfig | null> => {
-  const raw: string | undefined = await LocalStorage.getItem(buildKey(databaseId))
+  const raw: string | undefined = await LocalStorage.getItem(
+    buildKey(databaseId)
+  )
 
   if (!raw) return null
 
@@ -16,5 +18,8 @@ export const loadAccessoryConfig = async (
 export const storeAccessoryConfig = (
   config: AccessoryConfig
 ): Promise<void> => {
-  return LocalStorage.setItem(buildKey(config.databaseId), JSON.stringify(config))
+  return LocalStorage.setItem(
+    buildKey(config.databaseId),
+    JSON.stringify(config)
+  )
 }

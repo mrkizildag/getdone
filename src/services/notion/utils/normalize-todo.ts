@@ -37,6 +37,8 @@ export const normalizeTodo = ({
     ? extractExtraProperties(page, accessoryConfig)
     : {}
 
+  const subIssues = preferences.subIssues
+
   return {
     id: page.id,
     title: titleWithGlyph,
@@ -60,6 +62,15 @@ export const normalizeTodo = ({
     dateValue: dateValue,
     date: dateValue ? new Date(dateValue) : null,
     extraProperties,
+    parentId: subIssues
+      ? page.properties[subIssues.parentProperty]?.relation?.[0]?.id ?? null
+      : null,
+    subIssueIds:
+      subIssues?.childProperty && page.properties[subIssues.childProperty]
+        ? (page.properties[subIssues.childProperty].relation ?? []).map(
+            (relation: { id: string }) => relation.id
+          )
+        : [],
   }
 }
 

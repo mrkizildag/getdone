@@ -1,4 +1,5 @@
 import { Database } from '@/types/database'
+import { SubIssuesConfig } from '@/types/sub-issues'
 import { DatabaseObjectResponse } from '@notionhq/client/build/src/api-endpoints'
 import { notion } from '../client'
 
@@ -24,7 +25,7 @@ export async function getDatabases(): Promise<Database[]> {
         url: d.url,
       }),
       image: normalizeImage(d.icon),
-      columns: normalizeColumns(d.properties),
+      columns: normalizeColumns(d.properties, d.id),
     }
   })
 
@@ -43,8 +44,27 @@ const normalizeImage = (icon: DatabaseObjectResponse['icon']): string => {
   return ''
 }
 
+const NONE_SUB_ISSUES = {
+  data: { parentProperty: 'None' },
+  value: '{}',
+}
+
+/**
+ * Ranks candidate sub-issue relations so the one that actually points at the
+ * parent is preselected. Notion's native sub-items default to "Parent item" /
+ * "Sub-item", but both sides are self-referencing and indistinguishable by
+ * shape alone, so fall back to naming and let the user override in settings.
+ */
+const parentLikelihood = ({ data }: { data: SubIssuesConfig }): number => {
+  if (/parent/i.test(data.parentProperty)) return 2
+  if (/sub-?item|sub-?issue|sub-?task|child/i.test(data.parentProperty))
+    return 0
+  return 1
+}
+
 const normalizeColumns = (
-  properties: DatabaseObjectResponse['properties']
+  properties: DatabaseObjectResponse['properties'],
+  databaseId: string
 ): Database['columns'] => {
   const propertiesValues = Object.values(properties)
   const columns: Database['columns'] = {
@@ -52,6 +72,7 @@ const normalizeColumns = (
     date: [],
     status: [],
     project: [{ data: { databaseId: '', propertyName: 'None' }, value: '{}' }],
+    subIssues: [],
     assignee: [{ name: 'None', value: NONE_VALUE }],
     tags: [{ name: 'None', value: NONE_VALUE }],
     url: [{ name: 'None', value: NONE_VALUE }],
@@ -110,6 +131,23 @@ const normalizeColumns = (
       }
 
       columns.project.unshift({ data, value: JSON.stringify(data) })
+
+      // A relation pointing back at its own database is how Notion models
+      // sub-items, so it is also a sub-issue candidate.
+      if (item.relation.database_id === databaseId) {
+        const subIssues: SubIssuesConfig = {
+          parentProperty: item.name,
+          childProperty:
+            item.relation.type === 'dual_property'
+              ? item.relation.dual_property.synced_property_name
+              : undefined,
+        }
+
+        columns.subIssues.push({
+          data: subIssues,
+          value: JSON.stringify(subIssues),
+        })
+      }
     }
 
     if (item.type === 'people') {
@@ -125,5 +163,13 @@ const normalizeColumns = (
     }
   })
 
-  return columns
+  return {
+    ...columns,
+    subIssues: [
+      ...[...columns.subIssues].sort(
+        (a, b) => parentLikelihood(b) - parentLikelihood(a)
+      ),
+      NONE_SUB_ISSUES,
+    ],
+  }
 }

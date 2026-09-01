@@ -5,7 +5,8 @@ import { normalizeTodo } from '../utils/normalize-todo'
 
 export async function createTodo(
   todo: Todo,
-  databaseId: string
+  databaseId: string,
+  parentId?: string | null
 ): Promise<Todo> {
   const notionClient = await notion()
   const preferences = await loadPreferences()
@@ -50,6 +51,13 @@ export async function createTodo(
         ? {
             [preferences.properties.url]: {
               url: todo?.contentUrl ? todo.contentUrl : null,
+            },
+          }
+        : {}),
+      ...(preferences.properties.subIssues && parentId
+        ? {
+            [preferences.properties.subIssues.parentProperty]: {
+              relation: [{ id: parentId }],
             },
           }
         : {}),

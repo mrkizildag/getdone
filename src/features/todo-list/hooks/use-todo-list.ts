@@ -35,6 +35,7 @@ import { useStatuses } from '@/services/notion/hooks/use-get-statuses'
 import { setStatusTodo } from '@/services/notion/operations/set-status-todo'
 import { Status } from '@/types/status'
 import { useAccessoryConfig } from '@/features/accessory-config/use-accessory-config'
+import { useSubIssueNavigation } from './use-sub-issue-navigation'
 import { AccessoryConfig } from '@/types/accessory-config'
 
 export function useTodoList() {
@@ -78,11 +79,39 @@ export function useTodoList() {
     }
   }, [storedAccessoryConfig, preferences])
 
+  const subIssueNavigation = useSubIssueNavigation()
+  const hasSubIssueProperty = !!preferences?.properties?.subIssues
+
   const { todos, isLoading, mutate } = useTodos({
     databaseId: preferences.databaseId,
     filter: filterTodo,
     accessoryConfig,
+    parentId: subIssueNavigation.currentParent?.id ?? null,
+    scopeToLevel: hasSubIssueProperty && subIssueNavigation.scopeToLevel,
   })
+
+  // Moving between levels starts a fresh list, so the half-typed task that was
+  // being composed for the previous level must not leak into the new one.
+  const clearComposer = () => {
+    setSearchText('')
+    setNewTodo(null)
+  }
+
+  const handleOpenSubIssues = (todo: Todo) => {
+    if (todo.id.includes('fake-id-')) return
+    subIssueNavigation.drillInto(todo)
+    clearComposer()
+  }
+
+  const handleGoBack = () => {
+    subIssueNavigation.goBack()
+    clearComposer()
+  }
+
+  const handleToggleShowAllIssues = () => {
+    subIssueNavigation.toggleShowAllIssues()
+    clearComposer()
+  }
 
   const { projects, projectsById } = useProjects(
     preferences.properties?.relatedDatabase?.databaseId
@@ -158,7 +187,11 @@ export function useTodoList() {
       setSearchText('')
 
       const createdTodo = await mutate(
-        createTodo(optimisticTodo, preferences.databaseId),
+        createTodo(
+          optimisticTodo,
+          preferences.databaseId,
+          subIssueNavigation.currentParent?.id ?? null
+        ),
         {
           optimisticUpdate(data) {
             if (!data) return data
@@ -566,5 +599,10 @@ export function useTodoList() {
     mutatePreferences: revalidatePreferences,
     isNotionInstalled,
     accessoryConfig,
+    hasSubIssueProperty,
+    subIssueNavigation,
+    handleOpenSubIssues,
+    handleGoBack,
+    handleToggleShowAllIssues,
   }
 }
