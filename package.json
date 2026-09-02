@@ -67,7 +67,7 @@
     "publish": "npx @raycast/api@latest publish",
     "typecheck": "tsc --noEmit",
     "lint:ci": "eslint src test --ext .ts,.tsx",
-    "format:check": "prettier --check \"src/**/*.{ts,tsx}\" \"test/**/*.ts\" \"*.{json,md,mts}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx}\" \"test/**/*.ts\" \"oauth-server/**/*.{mjs,md}\" \"*.{json,md,mts}\"",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage"
