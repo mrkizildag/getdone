@@ -11,7 +11,7 @@ import {
 } from '@raycast/api'
 import { FormValidation, useCachedState, useForm } from '@raycast/utils'
 import { useEffect, useState } from 'react'
-import { withKnownColumns } from './utils/known-columns'
+import { resolveDatabase } from './utils/resolve-database'
 import {
   OnboardFormValues,
   normalizeValuesToStore,
@@ -33,13 +33,11 @@ export default function ConfigurationForm({
   )
   const [secondaryDb, setSecondaryDb] = useState<Database | null>(null)
 
-  // The cache may have been written by a build that knew about fewer columns.
-  const database = withKnownColumns(cachedDatabase)
+  // Live schema when it has arrived, cached snapshot only as a stand-in.
+  const database = resolveDatabase(cachedDatabase, databases)
 
-  // That cached copy is also a snapshot of the schema as it stood when the
-  // database was last picked. Refresh it once the live list arrives, so a
-  // property added in Notion since then shows up without the user having to
-  // re-select the database.
+  // Write the refreshed copy back so the next launch starts from current data
+  // rather than replaying the same staleness.
   useEffect(() => {
     if (!cachedDatabase) return
 
