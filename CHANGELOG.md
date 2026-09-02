@@ -8,6 +8,7 @@
   `⇧⇥` climbs back out, and `⌘⇧O` toggles between top-level-only and all issues
 - Sub-issue count badge on every parent task
 - Tasks created inside a level are filed under that parent automatically
+- The top-level-only / all-issues choice is remembered between launches
 
 #### Fixed
 

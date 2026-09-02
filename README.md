@@ -57,8 +57,10 @@ Two views, toggled with `⌘ + ⇧ + O`:
   in still works, so you can jump from a sub-issue's siblings straight into its
   own children.
 
-Switching view returns you to the top, since a path through the tree has no
-meaning in the flat view. A task created inside a level is automatically filed
+Your choice of view is remembered between launches. Switching view returns you
+to the top, since a path through the tree has no meaning in the flat view — but
+the path itself is never restored: reopening the command always starts at the
+top of whichever view you last used. A task created inside a level is automatically filed
 under that parent. The menu bar command is unaffected and always lists every
 active task, nested or not.
 
