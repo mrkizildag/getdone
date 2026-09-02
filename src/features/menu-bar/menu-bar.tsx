@@ -32,8 +32,8 @@ export function MenuBar() {
       title={`${todos?.length || 0}`}
       icon={{
         source: {
-          dark: 'light-hypersonic.png',
-          light: 'dark-hypersonic.png',
+          dark: 'getdone-light.png',
+          light: 'getdone-dark.png',
         },
       }}
     >

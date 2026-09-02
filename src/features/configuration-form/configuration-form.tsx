@@ -1,7 +1,5 @@
 import { useDatabases } from '@/services/notion/hooks/use-databases'
-import { NONE_VALUE } from '@/services/notion/operations/get-databases'
-import { formatNotionUrl } from '@/services/notion/utils/format-notion-url'
-import { Preferences, storePreferences } from '@/services/storage'
+import { storePreferences } from '@/services/storage'
 import { Database } from '@/types/database'
 import {
   Action,
@@ -12,69 +10,12 @@ import {
   useNavigation,
 } from '@raycast/api'
 import { FormValidation, useCachedState, useForm } from '@raycast/utils'
-import { useState } from 'react'
-
-type OnboardFormValues = {
-  mainDatabase: string
-  titleProperty: string
-  urlProperty: string
-  dateProperty: string
-  tagsProperty: string
-  statusProperty: string
-  assigneeProperty: string
-  projectProperty: string
-  projectStatusProperty: string
-  subIssuesProperty: string
-}
-
-const handleOptionalField = (value: string): string | undefined => {
-  return value === NONE_VALUE ? undefined : value
-}
-
-const normalizeValuesToStore = (
-  values: OnboardFormValues,
-  relatedDatabaseTitle?: string
-): Preferences => {
-  const mainDatabase = JSON.parse(values.mainDatabase || '{}')
-  const project = JSON.parse(values.projectProperty || '{}')
-  const status = JSON.parse(values.statusProperty || '{}')
-  const projectStatus = JSON.parse(values.projectStatusProperty || '{}')
-  const subIssues = JSON.parse(values.subIssuesProperty || '{}')
-
-  return {
-    databaseId: mainDatabase.id,
-    databaseName: mainDatabase.name,
-    databaseUrl: mainDatabase.url,
-    normalizedUrl: formatNotionUrl(mainDatabase.url),
-    properties: {
-      title: values.titleProperty,
-      date: values.dateProperty,
-      url: handleOptionalField(values.urlProperty),
-      status: {
-        type: status.type,
-        name: status.name,
-        doneName: status.doneName,
-        completedStatuses: status.completedStatuses,
-        inProgressId: status.inProgressId,
-        notStartedId: status.notStartedId,
-      },
-      tag: handleOptionalField(values.tagsProperty),
-      assignee: handleOptionalField(values.assigneeProperty),
-      subIssues: subIssues.parentProperty ? subIssues : undefined,
-      project: project.propertyName,
-      relatedDatabase: {
-        databaseId: project.databaseId,
-        title: relatedDatabaseTitle,
-        status: {
-          type: projectStatus.type,
-          name: projectStatus.name,
-          completedStatuses: projectStatus.completedStatuses,
-          doneName: projectStatus.doneName,
-        },
-      },
-    },
-  }
-}
+import { useEffect, useState } from 'react'
+import { withKnownColumns } from './utils/known-columns'
+import {
+  OnboardFormValues,
+  normalizeValuesToStore,
+} from './utils/normalize-values'
 
 export default function ConfigurationForm({
   revalidate,
@@ -86,11 +27,27 @@ export default function ConfigurationForm({
   const { databases, isLoading } = useDatabases()
   const { pop } = useNavigation()
 
-  const [database, setDatabase] = useCachedState<Database | null>(
+  const [cachedDatabase, setDatabase] = useCachedState<Database | null>(
     'synced-database',
     null
   )
   const [secondaryDb, setSecondaryDb] = useState<Database | null>(null)
+
+  // The cache may have been written by a build that knew about fewer columns.
+  const database = withKnownColumns(cachedDatabase)
+
+  // That cached copy is also a snapshot of the schema as it stood when the
+  // database was last picked. Refresh it once the live list arrives, so a
+  // property added in Notion since then shows up without the user having to
+  // re-select the database.
+  useEffect(() => {
+    if (!cachedDatabase) return
+
+    const live = databases.find((item) => item.id === cachedDatabase.id)
+    if (live && JSON.stringify(live) !== JSON.stringify(cachedDatabase)) {
+      setDatabase(live)
+    }
+  }, [databases, cachedDatabase, setDatabase])
 
   const { handleSubmit, values, setValue } = useForm<OnboardFormValues>({
     async onSubmit(values) {
@@ -146,7 +103,7 @@ export default function ConfigurationForm({
       // Set default values
       setValue('titleProperty', database.columns.title[0] || '')
       setValue('dateProperty', database.columns.date[0] || '')
-      setValue('statusProperty', database.columns.status[0]?.data.name || '')
+      setValue('statusProperty', database.columns.status[0]?.value || '')
       setValue('tagsProperty', database.columns.tags[0]?.value || '')
       setValue('assigneeProperty', database.columns.assignee[0]?.value || '')
       setValue('urlProperty', database.columns.url[0]?.value || '')
@@ -185,7 +142,7 @@ export default function ConfigurationForm({
         title="Database"
         value={values.mainDatabase}
         onChange={handleChangeMainDatabase}
-        info="Select the database where you will create tasks through Hypersonic"
+        info="Select the database where you will create tasks through GetDone"
         storeValue
       >
         {databases.map((item) => (
@@ -317,10 +274,10 @@ export default function ConfigurationForm({
         id="subIssuesProperty"
         value={values.subIssuesProperty}
         onChange={(v) => setValue('subIssuesProperty', v)}
-        info="Self-referencing relation pointing at a task's parent. Enables drilling into sub-issues with Ctrl+L and back out with Ctrl+H. When set, the main list shows only top-level tasks."
+        info="Choose the property that points at a task's PARENT (in Notion's default sub-item setup that is 'Parent item', not 'Sub-item'). Enables drilling into sub-issues with Tab and back out with Shift+Tab. When set, the main list shows only top-level tasks."
         storeValue
       >
-        {database?.columns.subIssues.map((item, index) => (
+        {database?.columns.subIssues?.map((item, index) => (
           <Form.Dropdown.Item
             key={`${item.data.parentProperty}-${index}`}
             value={item.value}

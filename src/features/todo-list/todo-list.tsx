@@ -274,10 +274,24 @@ export function TodoList() {
                   accessories={meta?.accessories ?? []}
                   actions={
                     <ActionPanel>
+                      {/*
+                        Order is load-bearing: Raycast binds the first action to
+                        `enter` and the second to `cmd+enter`, on top of any
+                        explicit shortcut. Setting a status has always been
+                        cmd+enter, so it has to stay second — the sub-issue
+                        actions carry their own shortcuts and sit below it.
+                      */}
                       <CompleteTodoAction
                         todo={todo}
                         onComplete={handleComplete}
                       />
+                      {hasStatusProperty && statuses?.length > 0 && (
+                        <SetStatusAction
+                          todo={todo}
+                          statuses={statuses}
+                          onSetStatus={handleSetStatus}
+                        />
+                      )}
                       {hasSubIssueProperty && (
                         <OpenSubIssuesAction
                           todo={todo}
@@ -286,13 +300,6 @@ export function TodoList() {
                       )}
                       {backAction}
                       {toggleAction}
-                      {hasStatusProperty && statuses?.length > 0 && (
-                        <SetStatusAction
-                          todo={todo}
-                          statuses={statuses}
-                          onSetStatus={handleSetStatus}
-                        />
-                      )}
                       {hasTagProperty ||
                       hasAssigneeProperty ||
                       hasProjectProperty ||

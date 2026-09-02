@@ -1,0 +1,33 @@
+[Unit]
+Description=GetDone Notion OAuth relay
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# EnvironmentFile holds NOTION_CLIENT_SECRET, so keep it root-owned and 0600.
+EnvironmentFile=/etc/getdone-oauth.env
+ExecStart=/usr/bin/node /srv/getdone-oauth/server.mjs
+Restart=on-failure
+RestartSec=5
+
+# The service reads two environment variables and talks to one host. Nothing
+# here needs write access, a home directory, or elevated privileges.
+DynamicUser=yes
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectHome=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictAddressFamilies=AF_INET AF_INET6
+RestrictNamespaces=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+SystemCallFilter=@system-service
+SystemCallErrorNumber=EPERM
+
+[Install]
+WantedBy=multi-user.target

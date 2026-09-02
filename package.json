@@ -1,12 +1,12 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "hypersonic",
-  "title": "Hypersonic",
-  "description": "Fastest Notion to-do app ever",
-  "icon": "icon-purple.png",
-  "author": "reboot.studio",
-  "owner": "mrkizildag",
+  "name": "getdone",
+  "title": "GetDone",
+  "description": "Fast Notion task manager with sub-issue navigation",
+  "icon": "icon.png",
+  "author": "mrkizildag",
   "contributors": [
+    "reboot_studio",
     "thomasjost",
     "mete_reis_kizildag"
   ],
@@ -22,14 +22,14 @@
     {
       "name": "index",
       "title": "My Tasks",
-      "subtitle": "Hypersonic",
+      "subtitle": "GetDone",
       "description": "Fastest Notion task manager",
       "mode": "view"
     },
     {
       "name": "active-todos",
       "title": "Active Tasks",
-      "subtitle": "Hypersonic",
+      "subtitle": "GetDone",
       "description": "See your active tasks",
       "mode": "menu-bar",
       "interval": "5m"
@@ -40,11 +40,11 @@
     "@notionhq/client": "2.2.0",
     "@raycast/api": "1.48.5",
     "@raycast/utils": "1.5.2",
-    "chrono-node": "2.4.1",
+    "chrono-node": "2.10.1",
     "date-fns": "2.29.3",
     "fuse.js": "6.6.2",
     "lodash": "4.17.21",
-    "node-fetch": "3.2.4"
+    "node-fetch": "3.3.2"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.191",
@@ -67,7 +67,7 @@
     "publish": "npx @raycast/api@latest publish",
     "typecheck": "tsc --noEmit",
     "lint:ci": "eslint src test --ext .ts,.tsx",
-    "format:check": "prettier --check \"src/**/*.{ts,tsx}\" \"test/**/*.ts\" \"*.{json,md,mts}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx}\" \"test/**/*.ts\" \"oauth-server/**/*.{mjs,md}\" \"*.{json,md,mts}\"",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage"

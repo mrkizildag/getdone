@@ -1,4 +1,28 @@
-# Hypersonic Changelog
+# GetDone Changelog
+
+## [Sub-issues and rename] - 2026-09-01
+
+#### New
+
+- Browse Notion sub-items as a tree: `⇥` drills into a task's sub-issues,
+  `⇧⇥` climbs back out, and `⌘⇧O` toggles between top-level-only and all issues
+- Sub-issue count badge on every parent task
+- Tasks created inside a level are filed under that parent automatically
+
+#### Fixed
+
+- Settings form threw away every change on submit: the status dropdown held a
+  bare property name where the submit handler expected JSON
+- Settings form crashed for anyone upgrading, on a database cached by an
+  earlier build
+- `⌘,` and `⌘⌫` are reserved by Raycast and had never worked; rebound to
+  `⌘⇧P` and `⌃X`
+
+#### Updated
+
+- Renamed from Hypersonic to GetDone, with a new icon
+- One paginated fetch replaces the per-level Notion query, so moving through
+  the tree is instant
 
 ## [2.1.1] - 2025-08-04
 

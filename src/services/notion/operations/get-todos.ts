@@ -5,23 +5,18 @@ import { normalizeTodo } from '../utils/normalize-todo'
 import { Filter } from '@/types/filter'
 import { AccessoryConfig } from '@/types/accessory-config'
 
+const NOTION_PAGE_SIZE = 100
+/** Safety valve so a very large database cannot spin the cursor loop forever. */
+const MAX_TODOS = 1000
+
 export async function getTodos({
   databaseId,
   filter,
   accessoryConfig,
-  parentId = null,
-  scopeToLevel = false,
 }: {
   databaseId: string
   filter: Filter
   accessoryConfig: AccessoryConfig | null
-  /** Show this task's children. `null` shows the top level of the tree. */
-  parentId?: string | null
-  /**
-   * Restrict results to a single level of the tree. Off by default so flat
-   * consumers such as the menu bar keep seeing every task, nested or not.
-   */
-  scopeToLevel?: boolean
 }): Promise<Todo[]> {
   const notionClient = await notion()
   const preferences = await loadPreferences()
@@ -47,24 +42,6 @@ export async function getTodos({
       }))
     }
   }
-
-  // With sub-issues configured the list becomes a tree: the root level holds
-  // only parentless tasks, and drilling in scopes the query to one parent.
-  const subIssues = preferences.properties.subIssues
-  const hierarchyQuery =
-    subIssues && scopeToLevel
-      ? [
-          parentId
-            ? {
-                property: subIssues.parentProperty,
-                relation: { contains: parentId },
-              }
-            : {
-                property: subIssues.parentProperty,
-                relation: { is_empty: true },
-              },
-        ]
-      : []
 
   const dynamicFiltersQuery = [
     ...(filter?.projectId && preferences.properties.project
@@ -101,29 +78,40 @@ export async function getTodos({
       : []),
   ]
 
-  const response = await notionClient.databases.query({
-    database_id: databaseId,
-    filter: {
-      and: [
-        ...(!filter.status?.id ? donePropertyQuery : []),
-        ...hierarchyQuery,
-        ...dynamicFiltersQuery,
-      ],
-    },
-    sorts: [
-      { property: status.name, direction: 'descending' },
-      {
-        property: preferences.properties.date,
-        direction: 'ascending',
-      },
-      {
-        timestamp: 'created_time',
-        direction: 'descending',
-      },
-    ],
-  })
+  // The tree is built client-side from these results, so every level has to be
+  // present in one fetch. Notion caps a page at 100, hence the cursor loop.
+  const results: any[] = []
+  let cursor: string | undefined = undefined
 
-  const todos = response.results.map((page) =>
+  do {
+    const response: any = await notionClient.databases.query({
+      database_id: databaseId,
+      start_cursor: cursor,
+      page_size: NOTION_PAGE_SIZE,
+      filter: {
+        and: [
+          ...(!filter.status?.id ? donePropertyQuery : []),
+          ...dynamicFiltersQuery,
+        ],
+      },
+      sorts: [
+        { property: status.name, direction: 'descending' },
+        {
+          property: preferences.properties.date,
+          direction: 'ascending',
+        },
+        {
+          timestamp: 'created_time',
+          direction: 'descending',
+        },
+      ],
+    })
+
+    results.push(...response.results)
+    cursor = response.has_more ? response.next_cursor ?? undefined : undefined
+  } while (cursor && results.length < MAX_TODOS)
+
+  const todos = results.map((page) =>
     normalizeTodo({
       page,
       preferences: preferences.properties,

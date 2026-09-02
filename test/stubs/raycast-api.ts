@@ -27,3 +27,25 @@ export const LocalStorage = {
     store.clear()
   },
 }
+
+/** The Notion client builds an OAuth client at module scope on import. */
+export const OAuth = {
+  RedirectMethod: { Web: 'web', App: 'app', AppURI: 'appURI' },
+  PKCEClient: class {
+    async authorizationRequest() {
+      return {}
+    }
+    async authorize() {
+      return {}
+    }
+    async getTokens() {
+      return undefined
+    }
+    async setTokens() {
+      return undefined
+    }
+    async removeTokens() {
+      return undefined
+    }
+  },
+}

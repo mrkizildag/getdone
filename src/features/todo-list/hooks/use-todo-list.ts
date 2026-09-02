@@ -36,6 +36,10 @@ import { setStatusTodo } from '@/services/notion/operations/set-status-todo'
 import { Status } from '@/types/status'
 import { useAccessoryConfig } from '@/features/accessory-config/use-accessory-config'
 import { useSubIssueNavigation } from './use-sub-issue-navigation'
+import {
+  selectLevel,
+  withResolvedChildren,
+} from '@/features/todo-list/utils/sub-issue-tree'
 import { AccessoryConfig } from '@/types/accessory-config'
 
 export function useTodoList() {
@@ -86,8 +90,6 @@ export function useTodoList() {
     databaseId: preferences.databaseId,
     filter: filterTodo,
     accessoryConfig,
-    parentId: subIssueNavigation.currentParent?.id ?? null,
-    scopeToLevel: hasSubIssueProperty && subIssueNavigation.scopeToLevel,
   })
 
   // Moving between levels starts a fresh list, so the half-typed task that was
@@ -228,7 +230,7 @@ export function useTodoList() {
       refreshMenuBar()
 
       if (action === 'SHARE') {
-        await Clipboard.copy(`Added to Hypersonic: ${createdTodo.shareUrl}`)
+        await Clipboard.copy(`Added to GetDone: ${createdTodo.shareUrl}`)
         await showHUD('Copied to Clipboard')
       }
 
@@ -554,17 +556,37 @@ export function useTodoList() {
     refreshMenuBar()
   }
 
+  const currentParentId = subIssueNavigation.currentParent?.id ?? null
+  const { showAllIssues } = subIssueNavigation
+
+  // Child ids come from the fetched set rather than the relation Notion
+  // returned, so the count on a row matches the rows drilling in will show.
+  const treeTodos = useMemo(
+    () => (hasSubIssueProperty ? withResolvedChildren(todos) : todos),
+    [todos, hasSubIssueProperty]
+  )
+
+  // Moving between levels is a filter over data already in hand: no refetch,
+  // so drilling in and toggling the view are instant.
+  const levelTodos = useMemo(
+    () =>
+      hasSubIssueProperty
+        ? selectLevel(treeTodos, currentParentId, showAllIssues)
+        : treeTodos,
+    [treeTodos, hasSubIssueProperty, currentParentId, showAllIssues]
+  )
+
   const filteredTodos = useMemo(() => {
     if (searchText) {
       const key = searchText.toUpperCase()
-      const filteredTodos = todos.filter((item) =>
+      const matching = levelTodos.filter((item) =>
         item.title.toUpperCase().includes(key)
       )
-      return optimisticSorting(filteredTodos)
+      return optimisticSorting(matching)
     }
 
-    return optimisticSorting(todos)
-  }, [todos, searchText])
+    return optimisticSorting([...levelTodos])
+  }, [levelTodos, searchText])
 
   return {
     todos: filteredTodos,
