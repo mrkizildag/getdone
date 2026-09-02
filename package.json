@@ -1,12 +1,12 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "hypersonic",
-  "title": "Hypersonic",
-  "description": "Fastest Notion to-do app ever",
-  "icon": "icon-purple.png",
-  "author": "reboot.studio",
-  "owner": "mrkizildag",
+  "name": "getdone",
+  "title": "GetDone",
+  "description": "Fast Notion task manager with sub-issue navigation",
+  "icon": "icon.png",
+  "author": "mrkizildag",
   "contributors": [
+    "reboot_studio",
     "thomasjost",
     "mete_reis_kizildag"
   ],
@@ -22,14 +22,14 @@
     {
       "name": "index",
       "title": "My Tasks",
-      "subtitle": "Hypersonic",
+      "subtitle": "GetDone",
       "description": "Fastest Notion task manager",
       "mode": "view"
     },
     {
       "name": "active-todos",
       "title": "Active Tasks",
-      "subtitle": "Hypersonic",
+      "subtitle": "GetDone",
       "description": "See your active tasks",
       "mode": "menu-bar",
       "interval": "5m"
@@ -67,7 +67,7 @@
     "publish": "npx @raycast/api@latest publish",
     "typecheck": "tsc --noEmit",
     "lint:ci": "eslint src test --ext .ts,.tsx",
-    "format:check": "prettier --check \"src/**/*.{ts,tsx}\" \"test/**/*.ts\" \"*.{json,md,mts}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx}\" \"test/**/*.ts\" \"oauth-server/**/*.{mjs,md}\" \"*.{json,md,mts}\"",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage"
