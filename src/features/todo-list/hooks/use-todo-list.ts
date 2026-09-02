@@ -585,7 +585,7 @@ export function useTodoList() {
       return optimisticSorting(matching)
     }
 
-    return optimisticSorting([...levelTodos])
+    return optimisticSorting(levelTodos)
   }, [levelTodos, searchText])
 
   return {

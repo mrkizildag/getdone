@@ -48,3 +48,18 @@ describe('optimisticSorting', () => {
     expect(grouped['no-status'].map((t) => t.id)).toEqual(['dated', 'undated'])
   })
 })
+
+describe('input safety', () => {
+  test('does not reorder the array it was given', () => {
+    // The list hands this data straight from the fetch cache, and
+    // Array.prototype.sort works in place.
+    const input = [
+      todo('later', { date: new Date('2026-03-02') }),
+      todo('sooner', { date: new Date('2026-03-01') }),
+    ]
+
+    optimisticSorting(input)
+
+    expect(input.map((t) => t.id)).toEqual(['later', 'sooner'])
+  })
+})

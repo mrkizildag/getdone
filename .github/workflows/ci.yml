@@ -72,12 +72,11 @@ jobs:
       - name: Install dependencies
         run: $NPM_INSTALL
 
-      - name: Audit dependencies (blocking on critical)
-        # The extension inherits several high-severity advisories from the
-        # versions upstream pinned for @raycast/api 1.48.5, so gating at `high`
-        # would fail every PR on pre-existing debt. Critical is the gate; the
-        # full report below keeps the rest visible rather than silently passing.
-        run: npm audit --audit-level=critical
+      - name: Audit dependencies
+        # Raised from `critical` once the inherited advisories were cleared:
+        # four by a non-breaking `npm audit fix`, and lodash by dropping the
+        # dependency outright. Nothing high-severity should reappear unnoticed.
+        run: npm audit --audit-level=high
 
       - name: Full audit report (informational)
         if: always()
