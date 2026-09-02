@@ -1,4 +1,4 @@
-import { Action, Color, Icon } from '@raycast/api'
+import { Action, Color } from '@raycast/api'
 import { Todo } from '@/types/todo'
 
 export function CompleteTodoAction({
