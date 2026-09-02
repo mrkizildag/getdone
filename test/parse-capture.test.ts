@@ -48,6 +48,46 @@ describe('date extraction', () => {
     expect(captured.date).toBeNull()
     expect(captured.dateValue).toBeNull()
   })
+
+  test('ignores a passing mention of a month', () => {
+    // Reported from real use: selecting prose containing "September" set a
+    // deadline of the 1st, because chrono invents the day it was never told.
+    const captured = capture('In September we shipped the relay')
+
+    expect(captured.date).toBeNull()
+    expect(captured.dateValue).toBeNull()
+    expect(captured.title).toBe('In September we shipped the relay')
+  })
+
+  test('ignores a bare month on its own', () => {
+    expect(capture('september').date).toBeNull()
+    expect(capture('Plan the march').date).toBeNull()
+  })
+
+  test('ignores a time of day with no day attached', () => {
+    expect(capture('Standup is at 5pm').date).toBeNull()
+  })
+
+  test('keeps a date that names an actual day', () => {
+    expect(capture('Ship it on 3 March 2030').date?.getDate()).toBe(3)
+    expect(capture('Ship it 2030-03-03').date?.getDate()).toBe(3)
+  })
+
+  test('keeps a relative date', () => {
+    expect(capture('Ship it tomorrow').date).not.toBeNull()
+    expect(capture('Ship it next friday').date).not.toBeNull()
+  })
+
+  test('resolves a bare weekday forwards, never into the past', () => {
+    // A deadline in the past arrives already overdue.
+    const captured = capture('Ship it Monday')
+    const startOfToday = new Date()
+    startOfToday.setHours(0, 0, 0, 0)
+
+    expect(captured.date?.getTime()).toBeGreaterThanOrEqual(
+      startOfToday.getTime()
+    )
+  })
 })
 
 describe('url extraction', () => {
