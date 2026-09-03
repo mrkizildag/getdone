@@ -39,6 +39,19 @@ You can filter your task by user, project or label. Combining multiple filter yo
 
 ![Smart filtering](/metadata/hypersonic-3.png)
 
+### Capture without leaving what you're doing
+
+**Add Task from Selection** turns whatever text is selected — in an editor, a
+browser, anywhere — into a Notion task. It opens no window: it reads the
+selection, creates the task, and confirms with a HUD.
+
+Selections are prose rather than command syntax, so it reads a natural-language
+due date and a link and leaves the rest alone. A multi-line selection uses its
+first non-empty line as the title, truncated if it runs long.
+
+Assign it a global hotkey in Raycast under **Settings → Extensions → GetDone**
+and capture becomes a single keystroke from any app.
+
 ### Sub-issues
 
 Notion's native sub-items are supported as a browsable tree. Pick the

@@ -27,6 +27,13 @@
       "mode": "view"
     },
     {
+      "name": "add-task-from-selection",
+      "title": "Add Task from Selection",
+      "subtitle": "GetDone",
+      "description": "Turn the selected text into a Notion task without leaving what you are doing",
+      "mode": "no-view"
+    },
+    {
       "name": "active-todos",
       "title": "Active Tasks",
       "subtitle": "GetDone",

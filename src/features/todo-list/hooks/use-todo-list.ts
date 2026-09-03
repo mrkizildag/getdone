@@ -22,12 +22,11 @@ import { useProjects } from '@/services/notion/hooks/use-projects'
 import { updateTodoProject } from '@/services/notion/operations/update-todo-project'
 import { useUsers } from '@/services/notion/hooks/use-users'
 import { updateTodoUser } from '@/services/notion/operations/update-todo-user'
-import * as chrono from 'chrono-node'
 import { useTags } from '@/services/notion/hooks/use-tags'
 import { useLocalPreferences } from '@/services/notion/hooks/use-local-preferences'
 import { useFilter } from '@/services/notion/hooks/use-filter'
 import { autocomplete } from '../utils/autocomplete'
-import { toISOStringWithTimezone } from '../utils/to-iso-string-with-time-zone'
+import { parseDate, parseUrl } from '@/services/notion/utils/parse-text-fields'
 import { refreshMenuBar } from '../utils/refresh-menu-bar'
 import { optimisticSorting } from '../utils/optimistic-sorting'
 import { useIsNotionInstalled } from '@/services/notion/hooks/use-is-notion-installed'
@@ -417,10 +416,8 @@ export function useTodoList() {
     const projectMatch = text.match(/ #(\w+)/)
     const userMatch = text.match(/ @(\w+)/)
     const tagMatch = text.match(/ l:(\w+)/)
-    const dateMatch = chrono.parse(text)
-    const urlMatch = preferences?.properties?.url
-      ? text.match(/(?:https?):\/\/[\n\S]+/g)
-      : null
+    const parsedDate = parseDate(text)
+    const urlMatch = preferences?.properties?.url ? parseUrl(text) : null
     const statusMatch = text.match(/ \/(\w+)/)
 
     if (projectMatch) {
@@ -465,13 +462,13 @@ export function useTodoList() {
       tag = filterTodo.tag
     }
 
-    if (dateMatch && dateMatch.length > 0) {
-      date = dateMatch[0].start.date()
-      dateValue = toISOStringWithTimezone(dateMatch[0].start.date())
+    if (parsedDate) {
+      date = parsedDate.date
+      dateValue = parsedDate.dateValue
     }
 
     if (urlMatch) {
-      contentUrl = urlMatch[0]
+      contentUrl = urlMatch
     }
 
     if (statusMatch) {
@@ -492,9 +489,9 @@ export function useTodoList() {
       .replace(projectMatch ? projectMatch[0] : '', '')
       .replace(userMatch ? userMatch[0] : '', '')
       .replace(tagMatch ? tagMatch[0] : '', '')
-      .replace(urlMatch ? urlMatch[0] : '', '')
+      .replace(urlMatch ?? '', '')
       .replace(statusMatch ? statusMatch[0] : '', '')
-      .replace(dateMatch && dateMatch.length > 0 ? dateMatch[0].text : '', '')
+      .replace(parsedDate?.matchedText ?? '', '')
       .replace(/\s+/g, ' ')
       .trim()
 
