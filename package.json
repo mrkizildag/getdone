@@ -27,6 +27,20 @@
       "mode": "view"
     },
     {
+      "name": "add-task",
+      "title": "Add Task",
+      "subtitle": "GetDone",
+      "description": "Create a Notion task from text, without opening the task list",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Task — e.g. fix the parser tomorrow",
+          "type": "text"
+        }
+      ]
+    },
+    {
       "name": "add-task-from-selection",
       "title": "Add Task from Selection",
       "subtitle": "GetDone",

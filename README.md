@@ -41,6 +41,26 @@ You can filter your task by user, project or label. Combining multiple filter yo
 
 ### Capture without leaving what you're doing
 
+**Add Task** creates a task from text without opening the list. Type it straight
+into Raycast's root search, or fill the argument from a deeplink so the same
+command works from a shell, an editor, or a hotkey app:
+
+```sh
+# opens Raycast with the argument field focused
+open "raycast://extensions/mrkizildag/getdone/add-task"
+
+# or pass the text and stay where you are
+getdone-add() {
+  local text="${*:-$(cat)}"   # argument, or stdin so it pipes
+  local args
+  args=$(python3 -c 'import json,sys,urllib.parse;print(urllib.parse.quote(json.dumps({"text":sys.argv[1]})))' "$text")
+  open "raycast://extensions/mrkizildag/getdone/add-task?launchType=background&arguments=$args"
+}
+```
+
+`launchType=background` is what keeps Raycast from taking focus — the command
+runs silently and only the confirmation HUD appears.
+
 **Add Task from Selection** turns whatever text is selected — in an editor, a
 browser, anywhere — into a Notion task. It opens no window: it reads the
 selection, creates the task, and confirms with a HUD.
@@ -51,6 +71,11 @@ first non-empty line as the title, truncated if it runs long.
 
 Assign it a global hotkey in Raycast under **Settings → Extensions → GetDone**
 and capture becomes a single keystroke from any app.
+
+Note it reads the frontmost app's _accessibility_ selection, so it sees a
+browser or a native text field but not a visual-mode selection inside a
+terminal — macOS has no notion of the latter. Use `Add Task` with a `text`
+argument from there.
 
 ### Sub-issues
 

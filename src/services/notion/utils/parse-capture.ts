@@ -1,4 +1,4 @@
-import { parseDate, parseUrl } from './parse-text-fields'
+import { parseExplicitDate, parseUrl } from './parse-text-fields'
 
 /**
  * A selection is prose, not command syntax, so this deliberately does less than
@@ -6,6 +6,10 @@ import { parseDate, parseUrl } from './parse-text-fields'
  * else alone. Stripping `#project` or `@user` tokens here would mean resolving
  * them against Notion first, and a capture that waits on the network is a
  * capture that does not get used.
+ *
+ * The date parsing is stricter here too. Capture is blind — nothing shows you
+ * what it decided — so it only accepts a date that names an actual day, rather
+ * than letting a passing mention of a month become a deadline.
  */
 const MAX_TITLE_LENGTH = 120
 
@@ -22,7 +26,7 @@ export function parseCapture(
   text: string,
   { hasUrlProperty }: { hasUrlProperty: boolean }
 ): CapturedTask {
-  const parsedDate = parseDate(text)
+  const parsedDate = parseExplicitDate(text)
   const contentUrl = hasUrlProperty ? parseUrl(text) : null
 
   // A whole paragraph makes a terrible task title, and a selection often is

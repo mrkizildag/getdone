@@ -8,6 +8,8 @@
   `⇧⇥` climbs back out, and `⌘⇧O` toggles between top-level-only and all issues
 - Sub-issue count badge on every parent task
 - Tasks created inside a level are filed under that parent automatically
+- **Add Task**: create a task from text without opening the list — type it in
+  Raycast's root search, or drive it from a shell or hotkey app via deeplink
 - **Add Task from Selection**: turn selected text anywhere into a task without
   opening a window; bind it to a hotkey for one-keystroke capture
 - The top-level-only / all-issues choice is remembered between launches
