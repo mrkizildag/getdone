@@ -27,9 +27,14 @@ const userAccessory = (todo: Partial<Todo>, filter?: Filter): Accessories =>
 const projectAccessory = (
   todo: Partial<Todo>,
   projectsById: Record<string, Project>,
-  filter?: Filter
+  filter?: Filter,
+  parentId?: string | null
 ): Accessories => {
   if (!todo.projectId || filter?.projectId) return []
+
+  // Inside a level every row shares the same parent, and it is already named
+  // in the header — repeating it on each row is noise.
+  if (parentId && todo.projectId === parentId) return []
 
   const project = projectsById[todo.projectId]
   if (!project) return []
@@ -118,16 +123,19 @@ export function createAccessoriesArray({
   filter,
   showStatus = true,
   accessoryConfig,
+  parentId,
 }: {
   todo: Partial<Todo>
   projectsById: Record<string, Project>
   filter?: Filter
   showStatus?: boolean
   accessoryConfig?: AccessoryConfig | null
+  /** The level currently on screen, so its parent is not repeated per row. */
+  parentId?: string | null
 }): Accessories {
   return [
     ...userAccessory(todo, filter),
-    ...projectAccessory(todo, projectsById, filter),
+    ...projectAccessory(todo, projectsById, filter, parentId),
     ...statusAccessory(todo, showStatus, filter),
     ...configuredAccessories(todo, projectsById, accessoryConfig),
     ...deadlineAccessory(todo),

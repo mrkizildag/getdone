@@ -106,3 +106,42 @@ describe('sub-issue relation detection', () => {
     })
   })
 })
+
+describe('project relation options', () => {
+  test('offers a relation pointing at another database', async () => {
+    search.mockResolvedValue({
+      results: [
+        database({ Project: dualRelation('Project', OTHER_DB_ID, 'Tasks') }),
+      ],
+    })
+    const { getDatabases } = await import(
+      '@/services/notion/operations/get-databases'
+    )
+    const [db] = await getDatabases()
+
+    expect(db.columns.project.map((o) => o.data.propertyName)).toContain(
+      'Project'
+    )
+  })
+
+  test('withholds a self-referencing relation', async () => {
+    // Offered here it gets picked as the project link, and every task renders
+    // its own parent beside it. Hierarchy belongs in the sub-issue setting.
+    search.mockResolvedValue({
+      results: [
+        database({ Parent: dualRelation('Parent item', DB_ID, 'Sub-item') }),
+      ],
+    })
+    const { getDatabases } = await import(
+      '@/services/notion/operations/get-databases'
+    )
+    const [db] = await getDatabases()
+
+    expect(db.columns.project.map((o) => o.data.propertyName)).not.toContain(
+      'Parent item'
+    )
+    expect(db.columns.subIssues.map((o) => o.data.parentProperty)).toContain(
+      'Parent item'
+    )
+  })
+})
