@@ -21,8 +21,13 @@ import { SetStatusAction } from './components/set-todo-status-action'
 import { OpenSubIssuesAction } from './components/open-sub-issues-action'
 import { BackToParentAction } from './components/back-to-parent-action'
 import { ToggleSubIssuesAction } from './components/toggle-sub-issues-action'
+import {
+  SortByDeadlineAction,
+  SortModeSubmenu,
+} from './components/sort-todos-actions'
 import { getRenderer } from '@/services/accessories/renderer-registry'
 import { Todo } from '@/types/todo'
+import { Status } from '@/types/status'
 import { AccessoryConfig } from '@/types/accessory-config'
 
 function getExtraKeywords(
@@ -41,7 +46,9 @@ function getExtraKeywords(
 
 export function TodoList() {
   const {
-    todos,
+    sections,
+    sortMode,
+    setSortMode,
     tags,
     statuses,
     notionDbUrl,
@@ -82,12 +89,19 @@ export function TodoList() {
     subIssueNavigation
 
   const currentLevelCount = useMemo(
+    () => sections.reduce((total, section) => total + section.todos.length, 0),
+    [sections]
+  )
+
+  // A flattened list has no status in its section header, so each row resolves
+  // its own icon from the status the task carries.
+  const statusById = useMemo(
     () =>
-      Object.values(todos).reduce(
-        (total, list) => total + (list?.length ?? 0),
-        0
+      (statuses ?? []).reduce<Record<string, Status>>(
+        (byId, status) => ({ ...byId, [status.id]: status }),
+        {}
       ),
-    [todos]
+    [statuses]
   )
 
   const backAction =
@@ -117,9 +131,8 @@ export function TodoList() {
       { accessories: List.Item.Accessory[]; keywords: string[] }
     > = {}
 
-    for (const statusId of Object.keys(todos)) {
-      const list = todos[statusId] ?? []
-      for (const todo of list) {
+    for (const section of sections) {
+      for (const todo of section.todos) {
         meta[todo.id] = {
           accessories: createAccessoriesArray({
             todo,
@@ -135,7 +148,7 @@ export function TodoList() {
     }
 
     return meta
-  }, [todos, projectsById, filterTodo, accessoryConfig, currentParent])
+  }, [sections, projectsById, filterTodo, accessoryConfig, currentParent])
 
   return (
     <List
@@ -247,125 +260,125 @@ export function TodoList() {
           }
         />
       ) : null}
-      {statuses?.map((status) => {
-        const numberOfIssues =
-          todos[status.id]?.length === 1
-            ? '1 issue'
-            : `${todos[status.id]?.length} issues`
-
-        return (
-          <List.Section
-            key={status.id}
-            title={status.name}
-            subtitle={numberOfIssues}
-          >
-            {todos[status.id]?.map((todo) => {
-              const meta = todoMeta[todo.id]
-              return (
-                <List.Item
-                  key={todo.id}
-                  icon={{
-                    source: status && status.icon ? status.icon : 'pending.svg',
-                    tintColor: status?.color
-                      ? status.color
-                      : Color.SecondaryText,
-                  }}
-                  title={todo.title}
-                  keywords={meta?.keywords}
-                  accessories={meta?.accessories ?? []}
-                  actions={
-                    <ActionPanel>
-                      {/*
-                        Order is load-bearing: Raycast binds the first action to
-                        `enter` and the second to `cmd+enter`, on top of any
-                        explicit shortcut. Setting a status has always been
-                        cmd+enter, so it has to stay second — the sub-issue
-                        actions carry their own shortcuts and sit below it.
-                      */}
-                      <CompleteTodoAction
+      {sections.map((section) => (
+        <List.Section
+          key={section.key}
+          title={section.title}
+          subtitle={section.subtitle}
+        >
+          {section.todos.map((todo) => {
+            const meta = todoMeta[todo.id]
+            const status = section.status ?? statusById[todo.status?.id ?? '']
+            return (
+              <List.Item
+                key={todo.id}
+                icon={{
+                  source: status && status.icon ? status.icon : 'pending.svg',
+                  tintColor: status?.color ? status.color : Color.SecondaryText,
+                }}
+                title={todo.title}
+                keywords={meta?.keywords}
+                accessories={meta?.accessories ?? []}
+                actions={
+                  <ActionPanel>
+                    {/*
+                      Order is load-bearing: Raycast binds the first action to
+                      `enter` and the second to `cmd+enter`, on top of any
+                      explicit shortcut. Setting a status has always been
+                      cmd+enter, so it has to stay second — the sub-issue and
+                      sort actions carry their own shortcuts and sit below it.
+                    */}
+                    <CompleteTodoAction
+                      todo={todo}
+                      onComplete={handleComplete}
+                    />
+                    {hasStatusProperty && statuses?.length > 0 && (
+                      <SetStatusAction
                         todo={todo}
-                        onComplete={handleComplete}
+                        statuses={statuses}
+                        onSetStatus={handleSetStatus}
                       />
-                      {hasStatusProperty && statuses?.length > 0 && (
-                        <SetStatusAction
+                    )}
+                    {hasSubIssueProperty && (
+                      <OpenSubIssuesAction
+                        todo={todo}
+                        onOpen={handleOpenSubIssues}
+                      />
+                    )}
+                    {backAction}
+                    {toggleAction}
+                    <SortModeSubmenu
+                      sortMode={sortMode}
+                      onSetSortMode={setSortMode}
+                    />
+                    <SortByDeadlineAction
+                      sortMode={sortMode}
+                      onSetSortMode={setSortMode}
+                    />
+                    {hasTagProperty ||
+                    hasAssigneeProperty ||
+                    hasProjectProperty ||
+                    hasStatusProperty ? (
+                      <SetFilter
+                        users={users}
+                        projects={projects}
+                        tags={tags}
+                        statuses={statuses}
+                        hasStatusProperty={hasStatusProperty}
+                        onSetFilter={handleSetFilter}
+                      />
+                    ) : null}
+                    <EditTodoTitleAction
+                      todo={todo}
+                      onUpdateTitle={handleUpdateTitle}
+                    />
+                    {todo.contentUrl ? (
+                      <OpenAttachedLink url={todo.contentUrl} />
+                    ) : null}
+                    <ActionPanel.Section>
+                      <RemindAction todo={todo} onSetDate={handleSetDate} />
+                      {hasTagProperty && (
+                        <SetLabelAction
                           todo={todo}
-                          statuses={statuses}
-                          onSetStatus={handleSetStatus}
-                        />
-                      )}
-                      {hasSubIssueProperty && (
-                        <OpenSubIssuesAction
-                          todo={todo}
-                          onOpen={handleOpenSubIssues}
-                        />
-                      )}
-                      {backAction}
-                      {toggleAction}
-                      {hasTagProperty ||
-                      hasAssigneeProperty ||
-                      hasProjectProperty ||
-                      hasStatusProperty ? (
-                        <SetFilter
-                          users={users}
-                          projects={projects}
                           tags={tags}
-                          statuses={statuses}
-                          hasStatusProperty={hasStatusProperty}
-                          onSetFilter={handleSetFilter}
+                          onSetLabel={handleSetTag}
+                          allowCreate
                         />
-                      ) : null}
-                      <EditTodoTitleAction
-                        todo={todo}
-                        onUpdateTitle={handleUpdateTitle}
-                      />
-                      {todo.contentUrl ? (
-                        <OpenAttachedLink url={todo.contentUrl} />
-                      ) : null}
-                      <ActionPanel.Section>
-                        <RemindAction todo={todo} onSetDate={handleSetDate} />
-                        {hasTagProperty && (
-                          <SetLabelAction
-                            todo={todo}
-                            tags={tags}
-                            onSetLabel={handleSetTag}
-                            allowCreate
-                          />
-                        )}
-                        {hasProjectProperty && (
-                          <SetProjectAction
-                            todo={todo}
-                            projects={projects}
-                            onSetProject={handleSetProject}
-                          />
-                        )}
-                        {hasAssigneeProperty && (
-                          <SetUserAction
-                            todo={todo}
-                            users={users}
-                            onSetUser={handleSetUser}
-                          />
-                        )}
-                        <CopyToDoAction todo={todo} />
-                        <CopyTaskLinkAction todo={todo} />
-                        {isNotionInstalled ? (
-                          <OpenInNotionAction url={todo.url} />
-                        ) : (
-                          <OpenOnNotionAction url={todo.shareUrl} />
-                        )}
-                        <DeleteTodoAction todo={todo} onDelete={handleDelete} />
-                      </ActionPanel.Section>
-                      <GeneralActions
-                        mutatePreferences={mutatePreferences}
-                        notionDbUrl={notionDbUrl}
-                      />
-                    </ActionPanel>
-                  }
-                />
-              )
-            })}
-          </List.Section>
-        )
-      })}
+                      )}
+                      {hasProjectProperty && (
+                        <SetProjectAction
+                          todo={todo}
+                          projects={projects}
+                          onSetProject={handleSetProject}
+                        />
+                      )}
+                      {hasAssigneeProperty && (
+                        <SetUserAction
+                          todo={todo}
+                          users={users}
+                          onSetUser={handleSetUser}
+                        />
+                      )}
+                      <CopyToDoAction todo={todo} />
+                      <CopyTaskLinkAction todo={todo} />
+                      {isNotionInstalled ? (
+                        <OpenInNotionAction url={todo.url} />
+                      ) : (
+                        <OpenOnNotionAction url={todo.shareUrl} />
+                      )}
+                      <DeleteTodoAction todo={todo} onDelete={handleDelete} />
+                    </ActionPanel.Section>
+                    <GeneralActions
+                      mutatePreferences={mutatePreferences}
+                      notionDbUrl={notionDbUrl}
+                    />
+                  </ActionPanel>
+                }
+              />
+            )
+          })}
+        </List.Section>
+      ))}
       <EmptyList
         notionDbUrl={notionDbUrl}
         mutatePreferences={mutatePreferences}

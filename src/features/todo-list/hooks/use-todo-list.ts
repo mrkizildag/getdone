@@ -28,13 +28,14 @@ import { useFilter } from '@/services/notion/hooks/use-filter'
 import { autocomplete } from '../utils/autocomplete'
 import { parseDate, parseUrl } from '@/services/notion/utils/parse-text-fields'
 import { refreshMenuBar } from '../utils/refresh-menu-bar'
-import { optimisticSorting } from '../utils/optimistic-sorting'
+import { buildTodoSections } from '../utils/todo-sections'
 import { useIsNotionInstalled } from '@/services/notion/hooks/use-is-notion-installed'
 import { useStatuses } from '@/services/notion/hooks/use-get-statuses'
 import { setStatusTodo } from '@/services/notion/operations/set-status-todo'
 import { Status } from '@/types/status'
 import { useAccessoryConfig } from '@/features/accessory-config/use-accessory-config'
 import { useSubIssueNavigation } from './use-sub-issue-navigation'
+import { useSortMode } from './use-sort-mode'
 import {
   selectLevel,
   withResolvedChildren,
@@ -83,6 +84,7 @@ export function useTodoList() {
   }, [storedAccessoryConfig, preferences])
 
   const subIssueNavigation = useSubIssueNavigation()
+  const { sortMode, setSortMode } = useSortMode()
   const hasSubIssueProperty = !!preferences?.properties?.subIssues
 
   const { todos, isLoading, mutate } = useTodos({
@@ -573,20 +575,22 @@ export function useTodoList() {
     [treeTodos, hasSubIssueProperty, currentParentId, showAllIssues]
   )
 
-  const filteredTodos = useMemo(() => {
-    if (searchText) {
-      const key = searchText.toUpperCase()
-      const matching = levelTodos.filter((item) =>
-        item.title.toUpperCase().includes(key)
-      )
-      return optimisticSorting(matching)
-    }
+  const matchingTodos = useMemo(() => {
+    if (!searchText) return levelTodos
 
-    return optimisticSorting(levelTodos)
+    const key = searchText.toUpperCase()
+    return levelTodos.filter((item) => item.title.toUpperCase().includes(key))
   }, [levelTodos, searchText])
 
+  const sections = useMemo(
+    () => buildTodoSections({ todos: matchingTodos, statuses, sortMode }),
+    [matchingTodos, statuses, sortMode]
+  )
+
   return {
-    todos: filteredTodos,
+    sections,
+    sortMode,
+    setSortMode,
     tags: tags,
     statuses,
     notionDbUrl: isNotionInstalled
