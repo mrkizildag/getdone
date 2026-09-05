@@ -49,3 +49,6 @@ export const OAuth = {
     }
   },
 }
+
+/** No preferences are set under test; callers fall back to their defaults. */
+export const getPreferenceValues = () => ({})

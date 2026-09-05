@@ -106,18 +106,21 @@ environment file holding the secret is never touched: it lives on the host only.
 
 ### 5. Point the extension at it
 
-In `src/services/notion/oauth/constants.ts`:
+No code change and no rebuild. In Raycast, **Settings → Extensions → GetDone**:
 
-```ts
-export const clientId = '<your Notion OAuth client id>'
-export const baseUrl = 'https://oauth.example.com'
-```
+| Preference              | Value                       |
+| ----------------------- | --------------------------- |
+| Self-hosted OAuth relay | `https://oauth.example.com` |
+| Notion OAuth client ID  | the client ID from step 1   |
 
-Changing `clientId` is what makes the switch take effect. A stored Notion token
-keeps working whichever relay obtained it — the relay only handles the
-handshake — so without noticing the change, existing installs would quietly go
-on using a token minted by the old integration. The extension records which
-integration issued its token and re-authorizes when that no longer matches.
+Leave either blank to fall back to the bundled defaults.
+
+Changing the client ID is what makes the switch take effect. A stored Notion
+token keeps working whichever relay obtained it — the relay only handles the
+handshake — so without noticing the change, the extension would go on using a
+token minted by the old integration. It records which integration issued the
+token and re-authorizes when that no longer matches, so you sign in once after
+setting these and are then entirely on your own infrastructure.
 
 ## Verifying
 
