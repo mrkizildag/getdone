@@ -1,24 +1,21 @@
-/**
- * Notion OAuth endpoints.
- *
- * These currently point at reboot.studio's integration and relay, inherited
- * from upstream. Switching to our own is two edits here — `clientId` and
- * `baseUrl` — once `oauth-server/` is deployed and a Notion public integration
- * is registered. See oauth-server/README.md and issue #4.
- *
- * Changing `clientId` also forces every existing install to re-authorize; see
- * `shouldReauthorize` for why that does not happen on its own.
- */
-export const clientId = '1931ba21-2fe6-4a82-830b-5a1c8088c17f'
-export const baseUrl = 'https://hypersonic-oauth.vercel.app'
+import { getPreferenceValues } from '@raycast/api'
+import {
+  DEFAULT_CLIENT_ID,
+  OAuthPreferences,
+  resolveOAuthConfig,
+} from './resolve-config'
+
+const config = resolveOAuthConfig(getPreferenceValues<OAuthPreferences>())
+
+export const clientId = config.clientId
+export const baseUrl = config.baseUrl
+export const authorizeUrl = config.authorizeUrl
+export const tokenUrl = config.tokenUrl
 
 /**
- * The integration that minted tokens before this extension started recording
- * which one it used. An install holding a token but no recorded issuer got it
- * from here, so treating the absence as this value keeps existing users signed
- * in right up until the clientId above actually changes.
+ * The integration that minted tokens before the extension recorded which one it
+ * used. An install holding a token but no record got it from here, so reading
+ * the absence as this value keeps existing users signed in until the configured
+ * integration actually differs.
  */
-export const legacyClientId = '1931ba21-2fe6-4a82-830b-5a1c8088c17f'
-
-export const authorizeUrl = `${baseUrl}/api/authorize`
-export const tokenUrl = `${baseUrl}/api/access-token`
+export const legacyClientId = DEFAULT_CLIENT_ID

@@ -56,7 +56,24 @@
       "interval": "5m"
     }
   ],
-  "preferences": [],
+  "preferences": [
+    {
+      "name": "oauthBaseUrl",
+      "title": "Self-hosted OAuth relay",
+      "description": "Base URL of your own OAuth relay, e.g. https://oauth.example.com. Leave blank to use the default. Changing this signs you out so the new relay is actually used.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "https://oauth.example.com"
+    },
+    {
+      "name": "oauthClientId",
+      "title": "Notion OAuth client ID",
+      "description": "OAuth client ID of your own Notion public integration. Leave blank to use the default. Must be set together with the relay above.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "00000000-0000-0000-0000-000000000000"
+    }
+  ],
   "dependencies": {
     "@notionhq/client": "2.2.0",
     "@raycast/api": "1.48.5",

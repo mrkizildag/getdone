@@ -25,6 +25,10 @@
 
 #### Updated
 
+- The Notion OAuth relay and client ID are configurable in settings, so a
+  self-hosted relay needs no rebuild. Changing the client ID re-authorizes,
+  since a stored token would otherwise keep using the previous integration.
+
 - Renamed from Hypersonic to GetDone, with a new icon
 - One paginated fetch replaces the per-level Notion query, so moving through
   the tree is instant
