@@ -13,6 +13,9 @@
 - **Add Task from Selection**: turn selected text anywhere into a task without
   opening a window; bind it to a hotkey for one-keystroke capture
 - The top-level-only / all-issues choice is remembered between launches
+- Sort the whole list on the spot: `⌘⇧D` sorts by deadline, and a Sort Tasks
+  submenu also offers title order or the default grouping by status. A sort
+  flattens the status sections, and the choice is remembered between launches
 
 #### Fixed
 

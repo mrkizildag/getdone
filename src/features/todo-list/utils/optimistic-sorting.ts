@@ -1,4 +1,5 @@
 import { Todo } from '@/types/todo'
+import { compareByDueDate } from './sort-todos'
 
 const NO_STATUS = 'no-status'
 
@@ -9,17 +10,7 @@ const NO_STATUS = 'no-status'
 export function optimisticSorting(todos: Todo[]): Record<string, Todo[]> {
   // Copy before sorting: `Array.prototype.sort` works in place, and this is
   // handed data owned by the fetch cache.
-  const todosTimeSorted = [...todos].sort((a, b) => {
-    if (a.date && b.date) {
-      return a.date.getTime() - b.date.getTime()
-    } else if (a.date) {
-      return -1
-    } else if (b.date) {
-      return 1
-    } else {
-      return 0
-    }
-  })
+  const todosTimeSorted = [...todos].sort(compareByDueDate)
 
   return todosTimeSorted.reduce<Record<string, Todo[]>>((grouped, todo) => {
     const key = todo?.status?.id || NO_STATUS
