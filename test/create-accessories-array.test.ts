@@ -103,3 +103,48 @@ describe('accessory order', () => {
     expect(kinds(accessories)).toEqual(['user', 'deadline', 'chevron'])
   })
 })
+
+describe('parent suppression inside a level', () => {
+  const withProject = {
+    ...todo(),
+    projectId: 'parent-1',
+  }
+  const projectsById = {
+    'parent-1': { id: 'parent-1', title: 'Ship the relay', icon: '' },
+  } as never
+
+  test('shows the relation at the root level', () => {
+    const accessories = createAccessoriesArray({
+      todo: withProject,
+      projectsById,
+      parentId: null,
+    })
+
+    expect(accessories).toContainEqual(
+      expect.objectContaining({ text: 'Ship the relay' })
+    )
+  })
+
+  test('hides it when it is the level you are already inside', () => {
+    // Every row here shares that parent and the header already names it.
+    const accessories = createAccessoriesArray({
+      todo: withProject,
+      projectsById,
+      parentId: 'parent-1',
+    })
+
+    expect(accessories).toEqual([])
+  })
+
+  test('still shows a relation that is not the current parent', () => {
+    const accessories = createAccessoriesArray({
+      todo: withProject,
+      projectsById,
+      parentId: 'some-other-task',
+    })
+
+    expect(accessories).toContainEqual(
+      expect.objectContaining({ text: 'Ship the relay' })
+    )
+  })
+})

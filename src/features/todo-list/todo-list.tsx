@@ -127,6 +127,7 @@ export function TodoList() {
             filter: filterTodo,
             showStatus: false,
             accessoryConfig,
+            parentId: currentParent?.id ?? null,
           }),
           keywords: getExtraKeywords(todo, accessoryConfig),
         }
@@ -134,7 +135,7 @@ export function TodoList() {
     }
 
     return meta
-  }, [todos, projectsById, filterTodo, accessoryConfig])
+  }, [todos, projectsById, filterTodo, accessoryConfig, currentParent])
 
   return (
     <List

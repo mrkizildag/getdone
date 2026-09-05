@@ -125,16 +125,22 @@ const normalizeColumns = (
     }
 
     if (item.type === 'relation') {
-      const data = {
-        databaseId: item.relation.database_id,
-        propertyName: item.name,
+      const isSelfReferencing = item.relation.database_id === databaseId
+
+      // The "Relation" setting exists to pull in a *different* database, and
+      // everything downstream assumes that — a self-referencing relation
+      // offered here gets picked up as the project link and renders every
+      // task's parent beside it. Hierarchy belongs in the sub-issue setting.
+      if (!isSelfReferencing) {
+        const data = {
+          databaseId: item.relation.database_id,
+          propertyName: item.name,
+        }
+
+        columns.project.unshift({ data, value: JSON.stringify(data) })
       }
 
-      columns.project.unshift({ data, value: JSON.stringify(data) })
-
-      // A relation pointing back at its own database is how Notion models
-      // sub-items, so it is also a sub-issue candidate.
-      if (item.relation.database_id === databaseId) {
+      if (isSelfReferencing) {
         const subIssues: SubIssuesConfig = {
           parentProperty: item.name,
           childProperty:
