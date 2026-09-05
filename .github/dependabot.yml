@@ -19,6 +19,14 @@ updates:
       - dependency-name: '@raycast/api'
       - dependency-name: '@types/node'
       - dependency-name: 'typescript'
+      # Every Notion call runs through this. A major bump lands on the
+      # paginated flat fetch, the relation filters and the property
+      # normalisation — the parts that took several rounds to get right
+      # against a live database. Worth doing, but as its own migration with
+      # that path exercised, not as a weekly PR nobody reads.
+      - dependency-name: '@notionhq/client'
+        update-types:
+          - version-update:semver-major
 
   - package-ecosystem: github-actions
     directory: /
