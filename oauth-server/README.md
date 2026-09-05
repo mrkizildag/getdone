@@ -85,7 +85,26 @@ oauth.example.com {
 curl https://oauth.example.com/healthz     # {"ok":true}
 ```
 
-### 4. Point the extension at it
+### 4. Verify before cutting over
+
+```bash
+./verify.sh https://oauth.example.com
+```
+
+Exercises the happy path and both open-redirect guards. Passing does not prove
+the Notion credentials are right — only a real sign-in does that — but failing
+means the sign-in cannot possibly work.
+
+Later redeploys are one command:
+
+```bash
+./deploy.sh mrk@arch-box
+```
+
+It syncs the two source files, restarts the unit and confirms it came back. The
+environment file holding the secret is never touched: it lives on the host only.
+
+### 5. Point the extension at it
 
 In `src/services/notion/oauth/constants.ts`:
 
@@ -94,8 +113,11 @@ export const clientId = '<your Notion OAuth client id>'
 export const baseUrl = 'https://oauth.example.com'
 ```
 
-Existing users re-authorize once: tokens minted by a different integration are
-not valid for yours.
+Changing `clientId` is what makes the switch take effect. A stored Notion token
+keeps working whichever relay obtained it — the relay only handles the
+handshake — so without noticing the change, existing installs would quietly go
+on using a token minted by the old integration. The extension records which
+integration issued its token and re-authorizes when that no longer matches.
 
 ## Verifying
 
